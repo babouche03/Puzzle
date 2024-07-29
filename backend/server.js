@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import connectDB from './db/connectDB.js';
 import cookieParser from 'cookie-parser';
 import userRoutes from './routes/userRoutes.js'; 
+import postRoutes from './routes/postRoutes.js';
 
 dotenv.config();
 //通过 dotenv 加载 .env 文件中的环境变量到 process.env
@@ -19,7 +20,7 @@ app.use(cookieParser());
 
 // routes
 app.use("/api/users", userRoutes);
-// app.use("/api/posts", postRoutes);
+app.use("/api/posts", postRoutes);
 // app.use("/api/messages", messageRoutes);
 
 app.listen(PORT, () => console.log(`Server started at http://localhost:${PORT}`));
