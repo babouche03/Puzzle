@@ -24,3 +24,11 @@
 ::-webkit-scrollbar-thumb {
 	background-color: #555;
 }
+
+.ma-shan-zheng-regular {
+	font-family: "Ma Shan Zheng", cursive;
+	font-weight: 800;
+	font-style: normal;
+	font-size: 50px;
+  }
+  

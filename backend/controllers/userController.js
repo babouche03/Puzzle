@@ -1,4 +1,5 @@
 import User from "../models/userModel.js";
+import Post from "../models/postModel.js";
 import bcrypt from "bcryptjs";
 import generateTokenAndSetCookie from "../utils/helpers/generateTokenAndSetCookie.js";
 import mongoose from "mongoose";
@@ -7,17 +8,26 @@ import mongoose from "mongoose";
 const signupUser = async(req,res) =>{
     try {
 		const { name, email, username, password } = req.body;
-		const user = await User.findOne({ $or: [{ email }, { username }] }); //使用 User.findOne 方法在数据库中查找是否存在相同 email 或 username 的用户
+		// 验证是否所有必填字段都已填写
+		if (!username || !password) {
+			return res.status(400).json({ error: "你不填用户名和密码我很难办" });
+		  }
+		// 验证密码长度
+		if (password.length < 6) {
+			return res.status(400).json({ error: "密码至少6位,你是真不怕被盗号啊" });
+		  }
+
+		const user = await User.findOne({ username }); //使用 User.findOne 方法在数据库中查找是否存在相同username 的用户
 
 		if (user) {
-			return res.status(400).json({ error: "User already exists" });
+			return res.status(400).json({ error: "用户名已存在,换个名字吧" });
 		}
 		const salt = await bcrypt.genSalt(10);
 		const hashedPassword = await bcrypt.hash(password, salt); //对密码进行加密
 
 		const newUser = new User({
-			name,
-			email,
+			name: name || "",  // 可选字段
+			email: email || "", // 可选字段
 			username,
 			password: hashedPassword,
 		});
@@ -46,11 +56,13 @@ const signupUser = async(req,res) =>{
 // Login user
 const loginUser = async(req,res) => {
 	try {
+		console.log("Received login request with body:", req.body); // 打印请求体
 		const { username, password } = req.body;
 		const user = await User.findOne({ username });
-		const isPasswordCorrect = await bcrypt.compare(password, user?.password || "");
 
-		if (!user || !isPasswordCorrect) return res.status(400).json({ error: "Invalid username or password" });
+		const isPasswordCorrect = await bcrypt.compare(password, user?.password || "");
+		
+		if (!user || !isPasswordCorrect) return res.status(400).json({ error: "用户名或密码错误❌" });
 
 		if (user.isFrozen) {
 			user.isFrozen = false;

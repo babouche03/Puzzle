@@ -5,6 +5,7 @@ import './index.css'
 import { ChakraProvider } from '@chakra-ui/react'
 import { extendTheme } from '@chakra-ui/react'
 import { BrowserRouter } from 'react-router-dom'
+import { RecoilRoot } from "recoil";
 
 const config = {
 	initialColorMode: "dark",
@@ -23,10 +24,12 @@ const theme = extendTheme({ config,colors })
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
+	<RecoilRoot>
 	<BrowserRouter>
 	<ChakraProvider theme={theme}>
       <App />
     </ChakraProvider>
 	</BrowserRouter>
+	</RecoilRoot>
   </React.StrictMode>,
 )
