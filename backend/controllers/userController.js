@@ -3,6 +3,7 @@ import Post from "../models/postModel.js";
 import bcrypt from "bcryptjs";
 import generateTokenAndSetCookie from "../utils/helpers/generateTokenAndSetCookie.js";
 import mongoose from "mongoose";
+import { v2 as cloudinary} from "cloudinary";
 
 //Signup user
 const signupUser = async(req,res) =>{
@@ -76,8 +77,8 @@ const loginUser = async(req,res) => {
 			name: user.name,
 			email: user.email,
 			username: user.username,
-			// bio: user.bio,
-			// profilePic: user.profilePic,
+			bio: user.bio,
+			profilePic: user.profilePic,
 		});
 	} catch (error) {
 		res.status(500).json({ error: error.message });
@@ -146,14 +147,14 @@ const updateUser = async (req, res) => {
 			user.password = hashedPassword;
 		}
 
-		// if (profilePic) {
-		// 	if (user.profilePic) {
-		// 		await cloudinary.uploader.destroy(user.profilePic.split("/").pop().split(".")[0]);
-		// 	}
+		if (profilePic) {
+			if (user.profilePic) {
+				await cloudinary.uploader.destroy(user.profilePic.split("/").pop().split(".")[0]);
+			}
 
-		// 	const uploadedResponse = await cloudinary.uploader.upload(profilePic);
-		// 	profilePic = uploadedResponse.secure_url;
-		// }
+			const uploadedResponse = await cloudinary.uploader.upload(profilePic);
+			profilePic = uploadedResponse.secure_url;
+		}
 
 		user.name = name || user.name;
 		user.email = email || user.email;
