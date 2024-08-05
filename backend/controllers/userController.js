@@ -176,8 +176,8 @@ const updateUser = async (req, res) => {
 		// 	{ arrayFilters: [{ "reply.userId": userId }] }
 		// );
 
-		// // password should be null in response
-		// user.password = null;
+		// password should be null in response
+		user.password = null;
 
 		res.status(200).json(user);
 	} catch (err) {
@@ -190,18 +190,19 @@ const updateUser = async (req, res) => {
 const getUserProfile = async (req, res) => {
 	// We will fetch user profile either with username or userId
 	// query is either username or userId
-	const {username} = req.params;
-
+	const { username } = req.params;
+  
 	try {
-		const user = await User.findOne({username}).select("-password").select("-updatedAt");
-		if (!user) return res.status(404).json({ message: "User not found" });
-
-		res.status(200).json(user);
+	  // Convert the username to lowercase and use regex for case-insensitive matching
+	  const user = await User.findOne({ username: new RegExp(`^${username}$`, 'i') }).select("-password").select("-updatedAt");
+	  if (!user) return res.status(404).json({ message: "User not found" });
+  
+	  res.status(200).json(user);
 	} catch (err) {
-		res.status(500).json({ message: err.message });
-		console.log("Error in getUserProfile: ", err.message);
+	  res.status(500).json({ message: err.message });
+	  console.log("Error in getUserProfile: ", err.message);
 	}
-};
+  };
 
 
 export {signupUser, loginUser,logoutUser,followUnFollowUser,updateUser,getUserProfile};

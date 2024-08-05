@@ -5,11 +5,17 @@ import cookieParser from 'cookie-parser';
 import userRoutes from './routes/userRoutes.js'; 
 import postRoutes from './routes/postRoutes.js';
 import {v2 as cloudinary} from "cloudinary";
+import bodyParser from "body-parser";
 dotenv.config();
 //通过 dotenv 加载 .env 文件中的环境变量到 process.env
 
 connectDB();//连接mongodb数据库
 const app = express();
+
+// 增加请求负载限制
+app.use(bodyParser.json({ limit: '20mb' }));
+app.use(bodyParser.urlencoded({ limit: '20mb', extended: true }));
+
 
 const PORT=process.env.PORT || 5000;
 

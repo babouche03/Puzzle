@@ -1,11 +1,19 @@
-import {Box, Flex,VStack,Text,Avatar,Link} from '@chakra-ui/react'
+import {Box, Flex,VStack,Text,Avatar,Link,Button,useColorModeValue} from '@chakra-ui/react'
 import { BsInstagram } from "react-icons/bs";
 import { CgMoreO } from "react-icons/cg";
 import { Menu, MenuButton, MenuList, MenuItem } from "@chakra-ui/react";
 import { Portal } from "@chakra-ui/react";
 import { useToast } from "@chakra-ui/react";
-const UserHeader = () => {
+import { useRecoilValue } from "recoil";
+import userAtom from "../atoms/userAtom";
+import {Link as RouterLink} from "react-router-dom";
+import useFollowUnfollow from '../hooks/useFollowUnfollow';
+
+const UserHeader = ({user}) => {
   const toast = useToast()
+  const currentUser = useRecoilValue(userAtom); // logged in user
+  const { handleFollowUnfollow, following, updating } = useFollowUnfollow(user);
+  const bgColor = useColorModeValue("gray.100", "gray.700");
 
   const copyURL = () => {
      const currentURL = window.location.href;
@@ -25,36 +33,64 @@ const UserHeader = () => {
     <Flex justifyContent={'space-between'} w={"full"}> 
       <Box>
         <Text fontSize={"2xl"} fontWeight={"bold"}>
-          Mark Zuckerberg
+          {user.username}
         </Text>
         <Flex gap={2} alignItems={"center"}>
             <Text fontSize={"sm"} >
-              mark Zuckerberg
+              {user.name}
             </Text>
             <Text fontSize={{
               base:"xs",
               md: "sm",
               'lg':"md",
-            }} bg={"gray.dark"} color={"gray.light"} p={1} borderRadius={"full"}>
-              puzzle chat.next
+            }} bg={bgColor} color={"gray.light"} p={1} borderRadius={"full"}>
+              puzzle .chat
             </Text>
 
         </Flex>
       </Box>
       <Box>
-        <Avatar name="mark zuckerberg"src="/zuck-avatar.png"size={
-          {
-            base:"md",
-            md: "xl",
-          }
-        } />
+      {user.profilePic && (
+						<Avatar
+							name={user.name}
+							src={user.profilePic}
+							size={{
+								base: "md",
+								md: "xl",
+							}}
+						/>
+					)}
+					{!user.profilePic && (
+						<Avatar
+							name={user.name}
+							src='https://bit.ly/broken-link'
+							size={{
+								base: "md",
+								md: "xl",
+							}}
+						/>
+					)}
       </Box>
     </Flex>
 
-    <Text>I am a product designer and I love building products that people love.</Text>
+    <Text>{user.bio}</Text>
+
+    {/* 若当前页面的查看用户为登录用户,则有权限更新个人资料 */}
+    {currentUser._id === user._id && (
+      <Link as={RouterLink} to='/update'>
+        <Button size={"sm"}>更新个人信息</Button>
+      </Link>
+    )}
+   
+   	{currentUser?._id !== user._id && (
+				<Button size={"sm"} onClick={handleFollowUnfollow} isLoading={updating}>
+					{following ? "取消关注" : "关注"}
+				</Button>
+			)}
+  
     <Flex w={"full"} justifyContent={"space-between"}>
         <Flex gap={2} alignItems={"center"}>
-            <Text color={"gray.light"}>3.2k followers</Text>
+            <Text color={"gray.light"}>{user.followers.length} followers</Text>
             <Box w="1" h="1" bg={"gray.light"} borderRadius={"full"}></Box>
             <Link color={"gray.light"}>babouche.com</Link>
         </Flex>
@@ -68,8 +104,8 @@ const UserHeader = () => {
                   <CgMoreO size={24} cursor={"pointer"} />
                 </MenuButton>
                 <Portal>
-                <MenuList bg={"gray.dark"}>
-									<MenuItem bg={"gray.dark"} onClick={copyURL}>
+                <MenuList bg={bgColor}>
+									<MenuItem bg={bgColor} onClick={copyURL}>
 										Copy link
 									</MenuItem>
 								</MenuList>
