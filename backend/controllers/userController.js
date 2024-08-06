@@ -195,11 +195,11 @@ const getUserProfile = async (req, res) => {
 	try {
 	  // Convert the username to lowercase and use regex for case-insensitive matching
 	  const user = await User.findOne({ username: new RegExp(`^${username}$`, 'i') }).select("-password").select("-updatedAt");
-	  if (!user) return res.status(404).json({ message: "User not found" });
+	  if (!user) return res.status(404).json({ error: "User not found" });
   
 	  res.status(200).json(user);
 	} catch (err) {
-	  res.status(500).json({ message: err.message });
+	  res.status(500).json({ error: err.message });
 	  console.log("Error in getUserProfile: ", err.message);
 	}
   };

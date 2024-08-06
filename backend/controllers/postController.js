@@ -1,5 +1,6 @@
 import User from "../models/userModel.js";
 import Post from "../models/postModel.js";
+import{v2 as cloudinary} from "cloudinary";
 //创建帖子
 const createPost = async (req, res) => {
     try {
