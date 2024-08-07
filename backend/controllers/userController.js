@@ -190,18 +190,25 @@ const updateUser = async (req, res) => {
 const getUserProfile = async (req, res) => {
 	// We will fetch user profile either with username or userId
 	// query is either username or userId
-	const { username } = req.params;
-  
-	try {
-	  // Convert the username to lowercase and use regex for case-insensitive matching
-	  const user = await User.findOne({ username: new RegExp(`^${username}$`, 'i') }).select("-password").select("-updatedAt");
-	  if (!user) return res.status(404).json({ error: "User not found" });
-  
-	  res.status(200).json(user);
-	} catch (err) {
-	  res.status(500).json({ error: err.message });
-	  console.log("Error in getUserProfile: ", err.message);
-	}
+	const { query } = req.params;
+
+    try {
+        let user;
+        // 如果 query 是有效的 ObjectId
+        if (mongoose.Types.ObjectId.isValid(query)) {
+            user = await User.findOne({ _id: query }).select("-password").select("-updatedAt");
+        } else {
+            // 如果 query 是用户名（忽略大小写）
+            user = await User.findOne({ username: new RegExp(`^${query}$`, 'i') }).select("-password").select("-updatedAt");
+        }
+
+        if (!user) return res.status(404).json({ error: "User not found" });
+
+        res.status(200).json(user);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+        console.log("Error in getUserProfile: ", err.message);
+    }
   };
 
 
