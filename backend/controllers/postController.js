@@ -118,7 +118,7 @@ const replyToPost = async (req, res) => {
 		const username = req.user.username;
 
 		if (!text) {
-			return res.status(400).json({ error: "Text field is required" });
+			return res.status(400).json({ error: "评论内容不能为空" });
 		}
 
 		const post = await Post.findById(postId);

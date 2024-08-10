@@ -7,10 +7,15 @@ import { Menu, MenuButton, MenuList, MenuItem } from "@chakra-ui/react";
 import useShowToast from "../hooks/useShowToast";
 import { Link,useNavigate } from'react-router-dom';
 import {formatDistanceToNow} from "date-fns";
+import {DeleteIcon} from "@chakra-ui/icons";
+import { useRecoilValue } from 'recoil';
+import userAtom from '../atoms/userAtom';
 
-const Post = ({post,postedBy}) => {
+const Post = ({post,postedBy,setPosts}) => {
     const showToast = useShowToast();
     const [user, setUser] = useState(null);
+    const currentUser = useRecoilValue(userAtom)
+
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -32,6 +37,27 @@ const Post = ({post,postedBy}) => {
 
 		getUser();
 	}, [postedBy, showToast]);
+
+    const handleDeletePost = async (e) => {
+		try {
+			e.preventDefault();
+			if (!window.confirm("您确定要删除这条帖子吗?")) return;
+
+			const res = await fetch(`/api/posts/${post._id}`, {
+				method: "DELETE",
+			});
+			const data = await res.json();
+			if (data.error) {
+				showToast("Error", data.error, "error");
+				return;
+			}
+			showToast("Success", "删除成功", "success");
+			setPosts((prev)=> prev.filter((p) => p._id !== post._id));
+		} catch (error) {
+			showToast("Error", error.message, "error");
+		}
+	};
+
 
     if (!user) return null;
 
@@ -116,16 +142,19 @@ const Post = ({post,postedBy}) => {
                <Text fontSize={"sm"} width={36} textAlign={"right"} color={"gray.light"}>
                    {formatDistanceToNow(new Date(post.createdAt))} ago
                </Text>
-               <Menu>
-    <MenuButton>
-        <BsThreeDots />
-    </MenuButton>
-    <MenuList bg={"gray.dark"}>
-        <MenuItem bg={"gray.dark"} onClick={copyURL}>
-            Copy link
-        </MenuItem>
-    </MenuList>
-</Menu>
+
+               {currentUser?._id === user._id && <DeleteIcon size={20} onClick={handleDeletePost}/>}
+
+        <Menu>
+                <MenuButton>
+                    <BsThreeDots />
+                </MenuButton>
+                <MenuList bg={"gray.dark"}>
+                    <MenuItem bg={"gray.dark"} onClick={copyURL}>
+                        Copy link
+                    </MenuItem>
+                </MenuList>
+            </Menu>
            </Flex>
        </Flex>
 

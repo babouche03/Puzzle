@@ -6,34 +6,19 @@ import { Flex, Spinner } from "@chakra-ui/react";
 import { useRecoilState } from "recoil";
 import UserPost from "../components/UserPost";
 import Post from "../components/Post";
+import useGetUserProfile from "../hooks/useGetUserProfile";
+import postsAtom from "../atoms/postsAtom";
 
 const UserPage = () => {
-  const [user,setUser] = useState(null);
+  const {user, loading} = useGetUserProfile();
   const { username } =useParams();
   const showToast = useShowToast();
-  const [loading, setLoading] = useState(true);
   const [posts, setPosts] = useState([]);
-	const [fetchingPosts, setFetchingPosts] = useState(true);
+  const [fetchingPosts, setFetchingPosts] = useState(true);
 
 	useEffect(() => {
-		const getUser = async () => {
-			try {
-				const res = await fetch(`/api/users/profile/${username}`);
-				const data = await res.json();
-				if(data.error) {
-					showToast("Error", data.error, "error");
-					return;
-				}
-                setUser(data);
-				} catch (error) {
-					showToast("Error", error.message, "error");
-				} finally {
-			setLoading(false);
-         }
-	};
-
     const getPosts = async () => {
-			if (!user) return;
+			// if (!user) return;
 			setFetchingPosts(true);
 			try {
 				const res = await fetch(`/api/posts/user/${username}`);
@@ -48,9 +33,8 @@ const UserPage = () => {
 			}
 		};
 
-		getUser();
     getPosts();
-	}, [username, showToast]);
+	}, [username, showToast, setPosts, user]);
 
   if(!user && loading) {
     return (
@@ -66,7 +50,7 @@ const UserPage = () => {
     <> 
      <UserHeader user={user} />
 
-     {!fetchingPosts && posts.length === 0 && <h1>User has not posts.</h1>}
+        {!fetchingPosts && posts.length === 0 && <h1>该用户还未发表过帖子</h1>}
 			{fetchingPosts && (
 				<Flex justifyContent={"center"} my={12}>
 					<Spinner size={"xl"} />
@@ -74,7 +58,7 @@ const UserPage = () => {
 			)}
 
 			{posts.map((post) => (
-				<Post key={post._id} post={post} postedBy={post.postedBy} />
+				<Post key={post._id} post={post} postedBy={post.postedBy} setPosts={setPosts} />
 			))}
     </>
 

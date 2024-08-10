@@ -76,7 +76,7 @@ const UserHeader = ({user}) => {
     <Text>{user.bio}</Text>
 
     {/* 若当前页面的查看用户为登录用户,则有权限更新个人资料 */}
-    {currentUser._id === user._id && (
+    {currentUser?._id === user._id && (
       <Link as={RouterLink} to='/update'>
         <Button size={"sm"}>更新个人信息</Button>
       </Link>

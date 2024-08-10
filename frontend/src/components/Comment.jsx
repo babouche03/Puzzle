@@ -1,35 +1,31 @@
-import { useState } from'react'
 import { Flex, Text, Avatar, Divider } from '@chakra-ui/react'
-import { BsThreeDots } from 'react-icons/bs';
-import Actions from './Actions';
-const Comment = ({userAvatar, username, comment, likes, createdAt}) => {
-    const [liked,setLiked] = useState(false);
+
+// Comment 组件接收两个 props: reply 和 lastReply
+const Comment = ({ reply, lastReply }) => {
   return (
     <>
+      {/* 外层 Flex 容器，用于排列头像和文本。gap 定义子元素之间的间距，py 和 my 用于设置上下内外边距 */}
       <Flex gap={4} py={2} my={2} w={"full"}>
-      <Avatar src={userAvatar} size={"sm"} />
-				<Flex gap={1} w={"full"} flexDirection={"column"}>
-					<Flex w={"full"} justifyContent={"space-between"} alignItems={"center"}>
-						<Text fontSize='sm' fontWeight='bold'>
-							{username}
-						</Text>
-            <Flex gap={2} alignContent={"center"}>
-             <Text fontSize={"sm"} color={"gray.light"}>{createdAt}</Text>
-             <BsThreeDots />                       
-            </Flex>                                                               
-					</Flex>
-					<Text>{comment}</Text>
-          <Actions liked={liked} setLiked={setLiked} />   
-          
-            <Text color={"gray.light"} fontSize={"sm"}>
-             {likes+(liked ? 1 : 0)} likes
-            </Text>                                     
-				</Flex>
-
+        <Avatar src={reply.userProfilePic} size={"sm"} />
+        
+        {/* 另一个 Flex 容器，用于垂直排列用户名和评论文本 */}
+        <Flex gap={1} w={"full"} flexDirection={"column"}>
+          {/* 显示用户名和其他元素的容器。justifyContent 设置为 space-between，使内容两端对齐 */}
+          <Flex w={"full"} justifyContent={"space-between"} alignItems={"center"}>
+            {/* 显示用户名，Text 组件用于文本显示，fontSize 和 fontWeight 控制字体大小和粗细 */}
+            <Text fontSize='sm' fontWeight='bold'>
+              {reply.username}
+            </Text>
+          </Flex>
+          {/* 显示评论文本 */}
+          <Text>{reply.text}</Text>
+        </Flex>
       </Flex>
-      <Divider my={4} />
-    </>
-  )
-}
 
-export default Comment
+      {/* 如果不是最后一个回复，显示一个分割线，否则不显示 */}
+      {!lastReply ? <Divider /> : null}
+    </>
+  );
+};
+
+export default Comment;
