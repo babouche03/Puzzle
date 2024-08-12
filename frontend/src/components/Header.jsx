@@ -31,9 +31,17 @@ const Header = () => {
     /> 
 
      {user && (
-				<Link as={RouterLink} to={`/${user.username}`}>
+        <Flex alignItems={"center"} gap={4}>
+
+
+          <Link as={RouterLink} to={`/${user.username}`}>
 					<VscAccount size={24} />  
 				</Link>
+        <Button  size={"xs"} >
+			    <FiLogOut size={20} />
+		    </Button>
+        </Flex>
+				
 			)}
    </Flex>
   );

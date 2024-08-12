@@ -24,6 +24,8 @@ import usePreviewImg from "../hooks/usePreviewImg";
 import { useRecoilState, useRecoilValue } from "recoil";
 import userAtom from "../atoms/userAtom";
  import useShowToast from "../hooks/useShowToast";
+ import { useParams } from "react-router-dom";
+import postsAtom from "../atoms/postsAtom";
 
 const MAX_CHAR = 500;//定义了一个常量 MAX_CHAR，表示帖子内容的最大字符数为 500。
 
@@ -36,6 +38,8 @@ const CreatePost = () => {
     const user = useRecoilValue(userAtom);
     const showToast = useShowToast();
     const [loading, setLoading] = useState(false);
+	const [posts, setPosts] = useRecoilState(postsAtom);
+	const { username } = useParams();
 
     const handleTextChange = (e) => {
 		const inputText = e.target.value;
@@ -66,11 +70,11 @@ const CreatePost = () => {
 				showToast("Error", data.error, "error");
 				return;
 			}
-			showToast("Success", "Post created successfully", "success");
-			// if (username === user.username) {
-			// 	setPosts([data, ...posts]);
-			// }
-            //清空输入框和图片
+			showToast("Success", "帖子发布成功", "success");
+			if (username === user.username) {
+				setPosts([data, ...posts]);
+			}
+            // 清空输入框和图片
 			onClose();
 			setPostText("");
 			setImgUrl("");
@@ -88,11 +92,11 @@ const CreatePost = () => {
 				position={"fixed"}
 				bottom={10}
 				right={5}
-                leftIcon={<AddIcon />}
 				bg={useColorModeValue("gray.300", "gray.dark")}
-			    onClick={onOpen}
+			    onClick={onOpen}	
+				size={{ base: "sm", sm: "md" }}			
 			>
-			 发帖
+			  <AddIcon />
 			</Button>
 
             <Modal isOpen={isOpen} onClose={onClose}>

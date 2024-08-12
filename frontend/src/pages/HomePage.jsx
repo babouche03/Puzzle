@@ -8,7 +8,7 @@ import Post from "../components/Post";
 
 const HomePage = ()=> {
 
-    const [posts, setPosts] = useState([]);
+    const [posts, setPosts] = useRecoilState(postsAtom);
 	const [loading, setLoading] = useState(true);
 	const showToast = useShowToast();
 	useEffect(() => {
@@ -31,7 +31,7 @@ const HomePage = ()=> {
 			}
 		};
 		getFeedPosts();
-	}, [showToast]);
+	}, [showToast,setPosts]);
 
     return(
         <>

@@ -13,7 +13,7 @@ const UserPage = () => {
   const {user, loading} = useGetUserProfile();
   const { username } =useParams();
   const showToast = useShowToast();
-  const [posts, setPosts] = useState([]);
+  const [posts, setPosts] = useRecoilState(postsAtom);
   const [fetchingPosts, setFetchingPosts] = useState(true);
 
 	useEffect(() => {
@@ -58,7 +58,7 @@ const UserPage = () => {
 			)}
 
 			{posts.map((post) => (
-				<Post key={post._id} post={post} postedBy={post.postedBy} setPosts={setPosts} />
+				<Post key={post._id} post={post} postedBy={post.postedBy}  />
 			))}
     </>
 
