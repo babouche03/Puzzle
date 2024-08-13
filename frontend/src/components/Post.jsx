@@ -1,4 +1,4 @@
-import {Avatar} from '@chakra-ui/react'
+import {Avatar,useToast} from '@chakra-ui/react'
 import {Box, Flex, Image, Text} from '@chakra-ui/react'
 import { BsThreeDots } from "react-icons/bs";
 import Actions from './Actions'
@@ -19,6 +19,7 @@ const Post = ({post,postedBy}) => {
     const currentUser = useRecoilValue(userAtom)
     const [posts, setPosts] = useRecoilState(postsAtom);
     const navigate = useNavigate();
+    const toast = useToast();
 
     useEffect(() => {
 		const getUser = async () => {
@@ -63,17 +64,32 @@ const Post = ({post,postedBy}) => {
     if (!user) return null;
 
     const copyURL = () => {
-        const currentURL = window.location.href;
+        const currentURL = `${window.location.origin}/${user.username}/post/${post._id}`;
         navigator.clipboard.writeText(currentURL).then(() => {
             toast({
-                title: "Success.",
+                title: "链接已复制",
+                description: "帖子链接已复制到剪贴板",
                 status: "success",
-                description: "Post link copied.",
+                duration: 3000,
+                isClosable: true,
+            });
+        }).catch(() => {
+            toast({
+                title: "复制失败",
+                description: "无法复制链接，请稍后再试",
+                status: "error",
                 duration: 3000,
                 isClosable: true,
             });
         });
     };
+    const handleMenuClick = (e) => {
+        e.preventDefault(); // 阻止默认行为（如有必要）
+        copyURL();
+    };
+
+    
+
   return (
    <Link to={`/${user.username}/post/${post._id}`}>
    <Flex gap={3} mb={4} py={5}>
@@ -145,17 +161,17 @@ const Post = ({post,postedBy}) => {
                </Text>
 
                {currentUser?._id === user._id && <DeleteIcon size={20} onClick={handleDeletePost}/>}
-
-        <Menu>
-                <MenuButton>
-                    <BsThreeDots />
-                </MenuButton>
-                <MenuList bg={"gray.dark"}>
-                    <MenuItem bg={"gray.dark"} onClick={copyURL}>
-                        Copy link
-                    </MenuItem>
-                </MenuList>
-            </Menu>
+     
+               <Menu>
+                    <MenuButton onClick={handleMenuClick}>
+                        <BsThreeDots />
+                    </MenuButton>
+                    <MenuList bg={"gray.dark"}>
+                        <MenuItem bg={"gray.dark"} onClick={handleMenuClick}>
+                            Copy link
+                        </MenuItem>
+                    </MenuList>
+                </Menu>
            </Flex>
        </Flex>
 

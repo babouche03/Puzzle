@@ -36,7 +36,7 @@ const Actions = ({ post }) => {
 
 
   const handleLikeAndUnlike = async () => {
-	if (!user) return showToast("Error", "You must be logged in to like a post", "error");
+	if (!user) return showToast("Error", "您必须登录才能点赞", "error");
 	if (isLiking) return;
 	setIsLiking(true);
 	try {

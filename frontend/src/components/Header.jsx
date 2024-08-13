@@ -8,10 +8,14 @@ import { Link as RouterLink } from "react-router-dom";
 import { FiLogOut } from "react-icons/fi";
 import { BsFillChatQuoteFill } from "react-icons/bs";
 import { MdOutlineSettings } from "react-icons/md";
+import useLogout from "../hooks/useLogout";
+import  authScreenAtom  from "../atoms/authAtom";
 
 const Header = () => {
   const { colorMode, toggleColorMode } = useColorMode();
   const user = useRecoilValue(userAtom);
+  const logout = useLogout();
+  const setAuthScreen = useSetRecoilState(authScreenAtom);
 
   return (
    <Flex justifyContent={"space-between"} mt={6} mb='12'>
@@ -21,6 +25,12 @@ const Header = () => {
         <AiFillHome size={24} /> 
       </Link>
     )}
+
+    {!user && (
+				<Link as={RouterLink} to={"/auth"} onClick={() => setAuthScreen("login")} fontSize={"18"}>
+					登录
+				</Link>
+			)}
 
     <Image 
       cursor={'pointer'}
@@ -37,11 +47,17 @@ const Header = () => {
           <Link as={RouterLink} to={`/${user.username}`}>
 					<VscAccount size={24} />  
 				</Link>
-        <Button  size={"xs"} >
+        <Button  size={"xs"} onClick={logout}>
 			    <FiLogOut size={20} />
 		    </Button>
         </Flex>
 				
+			)}
+
+       {!user && (
+				<Link as={RouterLink} to={"/auth"} onClick={() => setAuthScreen("signup")} fontSize={"18"} >
+					注册
+				</Link>
 			)}
    </Flex>
   );

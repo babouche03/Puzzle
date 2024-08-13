@@ -16,8 +16,10 @@ import  userAtom from '../atoms/userAtom';
 import { useState, useRef } from'react';
 import usePreviewImg from '../hooks/usePreviewImg';
 import useShowToast from '../hooks/useShowToast';
+import { useNavigate } from 'react-router-dom';
 
 export default function UpdateProfilePage() {
+    const navigate = useNavigate();
     const [user, setUser] = useRecoilState(userAtom);
     const [inputs, setInputs] = useState({
 		name: user.name,
@@ -152,7 +154,9 @@ export default function UpdateProfilePage() {
             w="full"
             _hover={{
               bg: 'red.700',
-            }}>
+            }}
+            onClick={() => navigate(`/${user.username}`)} // 导航到个人主页
+            >
             取消
           </Button>
           <Button

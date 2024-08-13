@@ -21,7 +21,7 @@ const UserHeader = ({user}) => {
 			toast({
 				title: "Success.",
 				status: "success",
-				description: "Profile link copied.",
+				description: "个人主页链接已复制到剪贴板",
 				duration: 3000,
 				isClosable: true,
 			});
@@ -44,7 +44,7 @@ const UserHeader = ({user}) => {
               md: "sm",
               'lg':"md",
             }} bg={bgColor} color={"gray.light"} p={1} borderRadius={"full"}>
-              puzzle .chat
+              puzzle.site
             </Text>
 
         </Flex>
@@ -90,9 +90,9 @@ const UserHeader = ({user}) => {
   
     <Flex w={"full"} justifyContent={"space-between"}>
         <Flex gap={2} alignItems={"center"}>
-            <Text color={"gray.light"}>{user.followers.length} followers</Text>
+            <Text color={"gray.light"}>{user.followers.length} 关注者</Text>
             <Box w="1" h="1" bg={"gray.light"} borderRadius={"full"}></Box>
-            <Link color={"gray.light"}>babouche.com</Link>
+            <Text color={"gray.light"}>{user.following.length} 正在关注</Text>
         </Flex>
         <Flex>
             <Box className='icon-container'>
