@@ -4,44 +4,52 @@ import{v2 as cloudinary} from "cloudinary";
 //创建帖子
 const createPost = async (req, res) => {
     try {
-        // 从请求中提取字段
-		const { postedBy, text } = req.body;
-		let { img } = req.body;
+        const { postedBy, text } = req.body;
+        let { img } = req.body;
 
-        // 检查必需字段
-		if (!postedBy || !text) {
-			return res.status(400).json({ error: "Postedby and text fields are required" });
-		}
-        // 查找用户
-		const user = await User.findById(postedBy);
-		if (!user) {
-			return res.status(404).json({ error: "User not found" });
-		}
-        // 验证用户是否有权限创建帖子
-		if (user._id.toString() !== req.user._id.toString()) {
-			return res.status(401).json({ error: "Unauthorized to create post" });
-		}
+        if (!postedBy || !text) {
+            return res.status(400).json({ error: "帖子内容不能为空" });
+        }
 
-        // 检查文本长度
-		const maxLength = 500;
-		if (text.length > maxLength) {
-			return res.status(400).json({ error: `Text must be less than ${maxLength} characters` });
-		}
+        const user = await User.findById(postedBy);
+        if (!user) {
+            return res.status(404).json({ error: "用户未找到" });
+        }
+
+        if (user._id.toString() !== req.user._id.toString()) {
+            return res.status(401).json({ error: "无权创建帖子" });
+        }
+
+        const maxLength = 500;
+        if (text.length > maxLength) {
+            return res.status(400).json({ error: `文本长度必须小于 ${maxLength} 字符` });
+        }
+
+        // 检查图片数量
+        if (img && img.length > 4) {
+            return res.status(400).json({ error: "最多可以上传 4 张图片" });
+        }
+
         // 上传图片
-		if (img) {
-			const uploadedResponse = await cloudinary.uploader.upload(img);
-			img = uploadedResponse.secure_url;
-		}
-        // 创建并保存新帖子
-		const newPost = new Post({ postedBy, text, img });
-		await newPost.save();
+        const imgUrls = [];
+        if (img) {
+            for (const image of img) {
+                const uploadedResponse = await cloudinary.uploader.upload(image, {
+                    // 不使用上传预设
+                });
+                imgUrls.push(uploadedResponse.secure_url);
+            }
+        }
 
-		res.status(201).json(newPost);
-	} catch (err) {
-		res.status(500).json({ error: err.message });
-		console.log(err);
-	}
-}
+        const newPost = new Post({ postedBy, text, img: imgUrls });
+        await newPost.save();
+
+        res.status(201).json(newPost);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+        console.log(err);
+    }
+};
 //获取帖子
 const getPost = async (req, res) => {
     try {
@@ -63,16 +71,21 @@ const deletePost = async (req, res) => {
 		if (!post) {
 			return res.status(404).json({ error: "Post not found" });
 		}
-        //权限验证
+
+		// 权限验证
 		if (post.postedBy.toString() !== req.user._id.toString()) {
 			return res.status(401).json({ error: "Unauthorized to delete post" });
 		}
 
-		if (post.img) {
-			const imgId = post.img.split("/").pop().split(".")[0];
-			await cloudinary.uploader.destroy(imgId);
+		// 删除关联的图片
+		if (post.img && Array.isArray(post.img)) {
+			for (const imgUrl of post.img) {
+				const imgId = imgUrl.split("/").pop().split(".")[0];
+				await cloudinary.uploader.destroy(imgId);
+			}
 		}
 
+		// 删除帖子
 		await Post.findByIdAndDelete(req.params.id);
 
 		res.status(200).json({ message: "Post deleted successfully" });
@@ -136,6 +149,38 @@ const replyToPost = async (req, res) => {
 		res.status(500).json({ error: err.message });
 	}
 };
+
+// 删除评论
+const deleteComment = async (req, res) => {
+    try {
+        const postId = req.params.postId;
+        const commentId = req.params.commentId;
+        const userId = req.user._id;
+
+        const post = await Post.findById(postId);
+        if (!post) {
+            return res.status(404).json({ error: "Post not found" });
+        }
+
+        const comment = post.replies.id(commentId);
+        if (!comment) {
+            return res.status(404).json({ error: "Comment not found" });
+        }
+
+        // 权限验证：只有评论作者可以删除评论
+        if (comment.userId.toString() !== userId.toString()) {
+            return res.status(401).json({ error: "Unauthorized to delete comment" });
+        }
+
+        // 使用 Mongoose 的 pull 方法删除评论
+        post.replies.pull(commentId);
+        await post.save();
+
+        res.status(200).json({ message: "评论删除成功" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
 //获取用户关注的所有人的帖子，并按创建时间降序排序
 const getFeedPosts = async (req, res) => {
 	try {
@@ -170,4 +215,4 @@ const getUserPosts = async (req, res) => {
 		res.status(500).json({ error: error.message });
 	}
 };
-export { createPost, getPost, deletePost,likeUnlikePost,replyToPost,getFeedPosts,getUserPosts} 
+export { createPost, getPost, deletePost,likeUnlikePost,replyToPost,getFeedPosts,getUserPosts,deleteComment} 
