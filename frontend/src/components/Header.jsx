@@ -19,7 +19,7 @@ const Header = () => {
 
   return (
    <Flex justifyContent={"space-between"} mt={6} mb='12'>
-
+   
     {user &&(
       <Link as ={RouterLink} to="/">
         <AiFillHome size={24} /> 
@@ -46,7 +46,10 @@ const Header = () => {
 
           <Link as={RouterLink} to={`/${user.username}`}>
 					<VscAccount size={24} />  
-				</Link>
+				  </Link>
+          <Link as={RouterLink} to={`/chat`}>
+						<BsFillChatQuoteFill size={24} />
+					</Link>
         <Button  size={"xs"} onClick={logout}>
 			    <FiLogOut size={20} />
 		    </Button>
