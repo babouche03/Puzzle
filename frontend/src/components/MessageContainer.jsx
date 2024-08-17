@@ -1,19 +1,19 @@
 import { Avatar, Divider, Flex, Image, Skeleton, SkeletonCircle, Text, useColorModeValue } from "@chakra-ui/react";
 import Message from "./Message";
 import MessageInput from "./MessageInput";
-// import { useEffect, useRef, useState } from "react";
-// import useShowToast from "../hooks/useShowToast";
-// import { conversationsAtom, selectedConversationAtom } from "../atoms/messagesAtom";
-// import { useRecoilValue, useSetRecoilState } from "recoil";
-// import userAtom from "../atoms/userAtom";
+import { useEffect, useRef, useState } from "react";
+import useShowToast from "../hooks/useShowToast";
+import { conversationsAtom, selectedConversationAtom } from "../atoms/messagesAtom";
+import { useRecoilValue, useSetRecoilState } from "recoil";
+import userAtom from "../atoms/userAtom";
 // import { useSocket } from "../context/SocketContext.jsx";
 // import messageSound from "../assets/sounds/message.mp3";
 const MessageContainer = () => {
-	// const showToast = useShowToast();
-	// const selectedConversation = useRecoilValue(selectedConversationAtom);
-	// const [loadingMessages, setLoadingMessages] = useState(true);
-	// const [messages, setMessages] = useState([]);
-	// const currentUser = useRecoilValue(userAtom);
+	const showToast = useShowToast();
+	const selectedConversation = useRecoilValue(selectedConversationAtom);
+	const [loadingMessages, setLoadingMessages] = useState(true);
+	const [messages, setMessages] = useState([]);
+	const currentUser = useRecoilValue(userAtom);
 	// const { socket } = useSocket();
 	// const setConversations = useSetRecoilState(conversationsAtom);
 	// const messageEndRef = useRef(null);
@@ -81,28 +81,28 @@ const MessageContainer = () => {
 	// 	messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
 	// }, [messages]);
 
-	// useEffect(() => {
-	// 	const getMessages = async () => {
-	// 		setLoadingMessages(true);
-	// 		setMessages([]);
-	// 		try {
-	// 			if (selectedConversation.mock) return;
-	// 			const res = await fetch(`/api/messages/${selectedConversation.userId}`);
-	// 			const data = await res.json();
-	// 			if (data.error) {
-	// 				showToast("Error", data.error, "error");
-	// 				return;
-	// 			}
-	// 			setMessages(data);
-	// 		} catch (error) {
-	// 			showToast("Error", error.message, "error");
-	// 		} finally {
-	// 			setLoadingMessages(false);
-	// 		}
-	// 	};
+	useEffect(() => {
+		const getMessages = async () => {
+			setLoadingMessages(true);
+			setMessages([]);
+			try {
+				if (selectedConversation.mock) return;
+				const res = await fetch(`/api/messages/${selectedConversation.userId}`);
+				const data = await res.json();
+				if (data.error) {
+					showToast("Error", data.error, "error");
+					return;
+				}
+				setMessages(data);
+			} catch (error) {
+				showToast("Error", error.message, "error");
+			}finally{
+				setLoadingMessages(false);
+			}
+		};
 
-	// 	getMessages();
-	// }, [showToast, selectedConversation.userId, selectedConversation.mock]);
+		getMessages();
+	}, [showToast, selectedConversation.userId]);
 
 	return (
 		<Flex
@@ -114,16 +114,16 @@ const MessageContainer = () => {
 		>
 			{/* Message header */}
 			<Flex w={"full"} h={12} alignItems={"center"} gap={2}>
-				<Avatar src='' size={"sm"} />
+				<Avatar src={selectedConversation.userProfilePic} size={"sm"} />
 				<Text display={"flex"} alignItems={"center"}>
-					cash <Image src='/verified.png' w={4} h={4} ml={1} />
+					{selectedConversation.username} <Image src='/verified.png' w={4} h={4} ml={1} />
 				</Text>
 			</Flex>
 
 			<Divider />
 
 			<Flex flexDir={"column"} gap={4} my={4} p={2} height={"400px"} overflowY={"auto"}>
-				{true &&
+				{loadingMessages &&
 					[...Array(5)].map((_, i) => (
 						<Flex
 							key={i}
@@ -143,23 +143,22 @@ const MessageContainer = () => {
 						</Flex>
 					))}
 
-					<Message ownMessage={true}/>
-					<Message ownMessage={false} />
+	
 
 
-				{/* {false &&
+				{!loadingMessages &&(
 					messages.map((message) => (
-						<Flex
-							key={message._id}
-							direction={"column"}
-							ref={messages.length - 1 === messages.indexOf(message) ? messageEndRef : null}
-						>
-							<Message message={message} ownMessage={currentUser._id === message.sender} />
-						</Flex>
-					))} */}
+						// <Flex
+						// 	key={message._id}
+						// 	direction={"column"}
+						// 	ref={messages.length - 1 === messages.indexOf(message) ? messageEndRef : null}
+						// >
+							<Message key={message._id} message={message} ownMessage={currentUser._id === message.sender}/>
+						// </Flex>
+					)))}
 			</Flex>
 
-			<MessageInput />
+			<MessageInput setMessages={setMessages} />
 		</Flex>
 	);
 };

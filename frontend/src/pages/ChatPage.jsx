@@ -8,12 +8,18 @@ import useShowToast from "../hooks/useShowToast";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { conversationsAtom, selectedConversationAtom } from "../atoms/messagesAtom";
 import userAtom from "../atoms/userAtom";
-// import { useSocket } from "../context/SocketContext";
+import { useSocket } from "../context/SocketContext";
 
 const ChatPage = () => {
-    const showToast = useShowToast();
+    const [searchingUser, setSearchingUser] = useState(false);
     const [loadingConversations, setLoadingConversations] = useState(true);
+	const [searchText, setSearchText] = useState("");
+	const [selectedConversation, setSelectedConversation] = useRecoilState(selectedConversationAtom);
 	const [conversations, setConversations] = useRecoilState(conversationsAtom);
+	const currentUser = useRecoilValue(userAtom);
+	const showToast = useShowToast();
+	const { socket, onlineUsers } = useSocket();
+	
 
 	useEffect(() => {
 		const getConversations = async () => {
@@ -36,6 +42,65 @@ const ChatPage = () => {
 
 		getConversations();
 	}, [showToast,setConversations]);
+
+	const handleConversationSearch = async (e) => {
+		e.preventDefault();
+		// 防止空输入的搜索
+	if (!searchText.trim()) {
+		showToast("Error", "请输入有效的用户名或PuzzleID进行搜索!", "error");
+		return;
+	}
+		setSearchingUser(true);
+		try {
+			const res = await fetch(`/api/users/profile/${searchText}`);
+			const searchedUser = await res.json();
+			if (searchedUser.error) {
+				showToast("Error", searchedUser.error, "error");
+				return;
+			}
+
+			const messagingYourself = searchedUser._id === currentUser._id;
+			if (messagingYourself) {
+				showToast("Error", "你不能与自己私聊！", "error");
+				return;
+			}
+
+			const conversationAlreadyExists = conversations.find(
+				(conversation) => conversation.participants[0]._id === searchedUser._id
+			);
+
+			if (conversationAlreadyExists) {
+				setSelectedConversation({
+					_id: conversationAlreadyExists._id,
+					userId: searchedUser._id,
+					username: searchedUser.username,
+					userProfilePic: searchedUser.profilePic,
+				});
+				return;
+			}
+
+			const mockConversation = {
+				mock: true,
+				lastMessage: {
+					text: "",
+					sender: "",
+				},
+				_id: Date.now(),
+				participants: [
+					{
+						_id: searchedUser._id,
+						username: searchedUser.username,
+						profilePic: searchedUser.profilePic,
+					},
+				],
+			};
+			setConversations((prevConvs) => [...prevConvs, mockConversation]);
+		} catch (error) {
+			showToast("Error", error.message, "error");
+		} finally {
+			setSearchingUser(false);
+		}
+	};
 
   return (
 	<Box
@@ -61,12 +126,12 @@ const ChatPage = () => {
 				mx={"auto"}
 			 >
 				<Text fontWeight={700} color={useColorModeValue("gray.600", "gray.400")}>
-                    Your Conversations
+                    信息列表 📄
                 </Text>
-				<form>
+				<form onSubmit={handleConversationSearch}>
 					<Flex alignItems={"center"} gap={2}>
-						<Input placeholder='Search for a user' />
-                        <Button size={"sm"}>
+						<Input placeholder='寻找用户' onChange={(e) => setSearchText(e.target.value)} />
+                        <Button size={"sm"} onClick={handleConversationSearch} isLoading={searchingUser}>
                             <SearchIcon />
                         </Button>
 
@@ -91,7 +156,7 @@ const ChatPage = () => {
 				 conversations.map((conversation) => (
 					<Conversation
 						key={conversation._id}
-						// isOnline={onlineUsers.includes(conversation.participants[0]._id)}
+						isOnline={onlineUsers.includes(conversation.participants[0]._id)}
 						conversation={conversation}
 					/>
 				))
@@ -99,7 +164,8 @@ const ChatPage = () => {
 
 			 </Flex>
 
-			 {/* <Flex 
+			 {!selectedConversation._id && (
+			 <Flex 
 			  flex={70}
 			  borderRadius={"md"}
 			  p={2}
@@ -109,9 +175,11 @@ const ChatPage = () => {
 			  height={"400px"}
 			 >
 			  <PiWechatLogoDuotone size={100}/>
-			  <Text fontSize={20}>选择一个好友开始聊天 🌐</Text>
-			 </Flex> */}
-			 <MessageContainer />
+			  <Text fontSize={20}>选择一个用户开始聊天 🌐</Text>
+			 </Flex>
+			 )}
+
+			 {selectedConversation._id && <MessageContainer />}
 			
 
 			</Flex>

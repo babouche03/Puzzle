@@ -13,16 +13,16 @@ import {
 import { useRecoilState, useRecoilValue } from "recoil";
 import userAtom from "../atoms/userAtom";
 import { BsCheck2All, BsFillImageFill } from "react-icons/bs";
-// import { selectedConversationAtom } from "../atoms/messagesAtom";
+import { selectedConversationAtom } from "../atoms/messagesAtom";
 
-const Conversation = ({ conversation }) => {
+const Conversation = ({ conversation, isOnline }) => {
 	const user = conversation.participants[0];
 	const currentUser = useRecoilValue(userAtom);
 	const lastMessage = conversation.lastMessage;
-	// const [selectedConversation, setSelectedConversation] = useRecoilState(selectedConversationAtom);
-	// const colorMode = useColorMode();
+	const [selectedConversation, setSelectedConversation] = useRecoilState(selectedConversationAtom);
+	const bgColor = useColorModeValue("gray.200", "gray.700");
 
-	// console.log("selectedConverstion", selectedConversation);
+	console.log("selectedConverstion", selectedConversation);
 	return (
 		<Flex
 			gap={4}
@@ -30,21 +30,21 @@ const Conversation = ({ conversation }) => {
 			p={"1"}
 			_hover={{
 				cursor: "pointer",
-				bg: useColorModeValue("gray.600", "gray.dark"),
+				bg: useColorModeValue("gray.300", "gray.600"),
 				color: "white",
 			}}
-			// onClick={() =>
-			// 	setSelectedConversation({
-			// 		_id: conversation._id,
-			// 		userId: user._id,
-			// 		userProfilePic: user.profilePic,
-			// 		username: user.username,
-			// 		mock: conversation.mock,
-			// 	})
-			// }
-			// bg={
-			// 	selectedConversation?._id === conversation._id ? (colorMode === "light" ? "gray.400" : "gray.dark") : ""
-			// }
+			onClick={() =>
+				setSelectedConversation({
+					_id: conversation._id,
+					userId: user._id,
+					userProfilePic: user.profilePic,
+					username: user.username,
+					mock: conversation.mock,
+				})
+			}
+			bg={
+				selectedConversation?._id === conversation._id ? bgColor : ""
+			}
 			borderRadius={"md"}
 		>
 			<WrapItem>
@@ -57,7 +57,7 @@ const Conversation = ({ conversation }) => {
 					src={user.profilePic}
 				>
 					
-				<AvatarBadge boxSize='1em' bg='green.600' />
+					{isOnline ? <AvatarBadge boxSize='1em' bg='green.500' /> : ""}
 				</Avatar>
 			</WrapItem>
 

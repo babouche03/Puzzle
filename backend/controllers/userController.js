@@ -202,7 +202,7 @@ const getUserProfile = async (req, res) => {
             user = await User.findOne({ username: new RegExp(`^${query}$`, 'i') }).select("-password").select("-updatedAt");
         }
 
-        if (!user) return res.status(404).json({ error: "User not found" });
+        if (!user) return res.status(404).json({ error: "用户不存在" });
 
         res.status(200).json(user);
     } catch (err) {

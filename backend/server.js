@@ -7,11 +7,13 @@ import postRoutes from './routes/postRoutes.js';
 import {v2 as cloudinary} from "cloudinary";
 import bodyParser from "body-parser";
 import messageRoutes from './routes/messageRoutes.js';
+import { app, server } from "./socket/socket.js";
+
 dotenv.config();
 //通过 dotenv 加载 .env 文件中的环境变量到 process.env
 
 connectDB();//连接mongodb数据库
-const app = express();
+
 
 // 增加请求负载限制
 app.use(bodyParser.json({ limit: '20mb' }));
@@ -48,4 +50,4 @@ if (process.env.NODE_ENV === "production") {
 }
 
 
-app.listen(PORT, () => console.log(`Server started at http://localhost:${PORT}`));
+server.listen(PORT, () => console.log(`Server started at http://localhost:${PORT}`));

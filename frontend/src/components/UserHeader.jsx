@@ -1,5 +1,6 @@
 import {Box, Flex,VStack,Text,Avatar,Link,Button,useColorModeValue} from '@chakra-ui/react'
-import { BsInstagram } from "react-icons/bs";
+import { MdOutlineTextsms } from "react-icons/md";
+import { BsChatText } from "react-icons/bs";
 import { CgMoreO } from "react-icons/cg";
 import { Menu, MenuButton, MenuList, MenuItem } from "@chakra-ui/react";
 import { Portal } from "@chakra-ui/react";
@@ -96,7 +97,7 @@ const UserHeader = ({user}) => {
         </Flex>
         <Flex>
             <Box className='icon-container'>
-                <BsInstagram size={24} cursor={"pointer"} />
+            <BsChatText size={25} cursor={"pointer"}/>
             </Box>
             <Box className='icon-container'>
               <Menu>
