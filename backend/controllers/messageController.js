@@ -1,10 +1,11 @@
 import Conversation from "../models/conversationModel.js";
 import Message from "../models/messageModel.js";
-// import { v2 as cloudinary } from "cloudinary";
+import { getRecipientSocketId, io } from "../socket/socket.js";
+import { v2 as cloudinary } from "cloudinary";
 async function sendMessage(req, res){
     try{
         const { recipientId, message } = req.body;
-		// let { img } = req.body;
+		let { img } = req.body;
 		const senderId = req.user._id;
 
 		let conversation = await Conversation.findOne({
@@ -22,16 +23,16 @@ async function sendMessage(req, res){
 			await conversation.save();
 		}
 
-		// if (img) {
-		// 	const uploadedResponse = await cloudinary.uploader.upload(img);
-		// 	img = uploadedResponse.secure_url;
-		// }
+		if (img) {
+			const uploadedResponse = await cloudinary.uploader.upload(img);
+			img = uploadedResponse.secure_url;
+		}
 
 		const newMessage = new Message({
 			conversationId: conversation._id,
 			sender: senderId,
-			text: message
-			// img: img || "",
+			text: message,
+			img: img || "",
 		});
 
 		await Promise.all([
@@ -44,10 +45,10 @@ async function sendMessage(req, res){
 			}),
 		]);
 
-		// const recipientSocketId = getRecipientSocketId(recipientId);
-		// if (recipientSocketId) {
-		// 	io.to(recipientSocketId).emit("newMessage", newMessage);
-		// }
+		const recipientSocketId = getRecipientSocketId(recipientId);
+		if (recipientSocketId) {
+			io.to(recipientSocketId).emit("newMessage", newMessage);
+		}
 
 		res.status(201).json(newMessage);
 
@@ -99,6 +100,27 @@ async function getConversations(req, res) {
 	}
 }
 
+async function deleteMessage(req, res) {
+    try {
+		const { id } = req.params;
+		const message = await Message.findById(id);
+		if (!message) {
+			return res.status(404).json({ error: "消息不存在" });
+		}
+
+		// 检查是否是消息发送者
+		if (message.sender.toString() !== req.user._id.toString()) {
+			return res.status(403).json({ error: "您无权删除此消息" });
+		}
+
+		await message.remove();
+		res.status(200).json({ message: "消息已删除" });
+	} catch (error) {
+		res.status(500).json({ error: error.message });
+	}
+}
 
 
-export {sendMessage, getMessages, getConversations} 
+
+
+export {sendMessage, getMessages, getConversations, deleteMessage} 

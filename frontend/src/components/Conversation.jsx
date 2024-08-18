@@ -67,7 +67,7 @@ const Conversation = ({ conversation, isOnline }) => {
 				</Text>
 				<Text fontSize={"xs"} display={"flex"} alignItems={"center"} gap={1}>
 					{currentUser._id === lastMessage.sender ? (
-						<Box color={lastMessage.seen ? "blue.400" : ""}>
+						<Box color={lastMessage.seen ? "green.400" : ""}>
 							<BsCheck2All size={16} />
 						</Box>
 					) : (

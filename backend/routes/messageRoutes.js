@@ -1,6 +1,6 @@
 import express from 'express';
 import protectRoute from "../middlewares/protectRoute.js";
-import { sendMessage, getMessages, getConversations } from "../controllers/messageController.js";
+import { sendMessage, getMessages, getConversations,deleteMessage } from "../controllers/messageController.js";
 
 
 const router = express.Router();
@@ -8,5 +8,5 @@ const router = express.Router();
 router.get("/conversations", protectRoute, getConversations);
 router.get("/:otherUserId", protectRoute, getMessages);
 router.post("/", protectRoute, sendMessage);
-
+router.delete("/:messageId", protectRoute, deleteMessage);
 export default router;

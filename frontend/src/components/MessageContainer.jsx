@@ -6,80 +6,95 @@ import useShowToast from "../hooks/useShowToast";
 import { conversationsAtom, selectedConversationAtom } from "../atoms/messagesAtom";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import userAtom from "../atoms/userAtom";
-// import { useSocket } from "../context/SocketContext.jsx";
+import { useSocket } from "../context/SocketContext.jsx";
 // import messageSound from "../assets/sounds/message.mp3";
+
 const MessageContainer = () => {
 	const showToast = useShowToast();
 	const selectedConversation = useRecoilValue(selectedConversationAtom);
 	const [loadingMessages, setLoadingMessages] = useState(true);
 	const [messages, setMessages] = useState([]);
 	const currentUser = useRecoilValue(userAtom);
-	// const { socket } = useSocket();
-	// const setConversations = useSetRecoilState(conversationsAtom);
-	// const messageEndRef = useRef(null);
+	const { socket } = useSocket();
+	const setConversations = useSetRecoilState(conversationsAtom);
+	const messageEndRef = useRef(null); //聊天记录底部的ref
 
-	// useEffect(() => {
-	// 	socket.on("newMessage", (message) => {
-	// 		if (selectedConversation._id === message.conversationId) {
-	// 			setMessages((prev) => [...prev, message]);
-	// 		}
+	// 删除消息的函数
+	const handleDeleteMessage = async (messageId) => {
+		try {
+		  await fetch(`/api/messages/${messageId}`, {
+			method: 'DELETE',
+		  });
+		  // 更新前端 UI，删除消息
+		  setMessages((prevMessages) => prevMessages.filter((msg) => msg._id !== messageId));
+		} catch (error) {
+		  console.error("Failed to delete message:", error);
+		}
+	  };
 
-	// 		// make a sound if the window is not focused
-	// 		// if (!document.hasFocus()) {
-	// 		// 	const sound = new Audio(messageSound);
-	// 		// 	sound.play();
-	// 		// }
+	useEffect(() => {
+		socket.on("newMessage", (message) => {
+			if (selectedConversation._id === message.conversationId) {
+				setMessages((prev) => [...prev, message]);
+			}
 
-	// 		setConversations((prev) => {
-	// 			const updatedConversations = prev.map((conversation) => {
-	// 				if (conversation._id === message.conversationId) {
-	// 					return {
-	// 						...conversation,
-	// 						lastMessage: {
-	// 							text: message.text,
-	// 							sender: message.sender,
-	// 						},
-	// 					};
-	// 				}
-	// 				return conversation;
-	// 			});
-	// 			return updatedConversations;
-	// 		});
-	// 	});
+			// make a sound if the window is not focused
+			// if (!document.hasFocus()) {
+			// 	const sound = new Audio(messageSound);
+			// 	sound.play();
+			// }
 
-	// 	return () => socket.off("newMessage");
-	// }, [socket, selectedConversation, setConversations]);
+			setConversations((prev) => {
+				const updatedConversations = prev.map((conversation) => {
+					if (conversation._id === message.conversationId) {
+						return {
+							...conversation,
+							lastMessage: {
+								text: message.text,
+								sender: message.sender,
+							},
+						};
+					}
+					return conversation;
+				});
+				return updatedConversations;
+			});
+		});
 
-	// useEffect(() => {
-	// 	const lastMessageIsFromOtherUser = messages.length && messages[messages.length - 1].sender !== currentUser._id;
-	// 	if (lastMessageIsFromOtherUser) {
-	// 		socket.emit("markMessagesAsSeen", {
-	// 			conversationId: selectedConversation._id,
-	// 			userId: selectedConversation.userId,
-	// 		});
-	// 	}
+		return () => socket.off("newMessage");
+	}, [socket]); 
 
-	// 	socket.on("messagesSeen", ({ conversationId }) => {
-	// 		if (selectedConversation._id === conversationId) {
-	// 			setMessages((prev) => {
-	// 				const updatedMessages = prev.map((message) => {
-	// 					if (!message.seen) {
-	// 						return {
-	// 							...message,
-	// 							seen: true,
-	// 						};
-	// 					}
-	// 					return message;
-	// 				});
-	// 				return updatedMessages;
-	// 			});
-	// 		}
-	// 	});
-	// }, [socket, currentUser._id, messages, selectedConversation]);
+	//实时更新消息已读状态的功能
+	useEffect(() => {
+		const lastMessageIsFromOtherUser = messages.length && messages[messages.length - 1].sender !== currentUser._id;
+		if (lastMessageIsFromOtherUser) {
+			socket.emit("markMessagesAsSeen", {
+				conversationId: selectedConversation._id,
+				userId: selectedConversation.userId,
+			});
+		}
 
-	// useEffect(() => {
-	// 	messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
-	// }, [messages]);
+		socket.on("messagesSeen", ({ conversationId }) => {
+			if (selectedConversation._id === conversationId) {
+				setMessages((prev) => {
+					const updatedMessages = prev.map((message) => {
+						if (!message.seen) {
+							return {
+								...message,
+								seen: true,
+							};
+						}
+						return message;
+					});
+					return updatedMessages;
+				});
+			}
+		});
+	}, [socket, currentUser._id, messages, selectedConversation]);
+
+	useEffect(() => {
+		messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
+	}, [messages]);
 
 	useEffect(() => {
 		const getMessages = async () => {
@@ -102,7 +117,7 @@ const MessageContainer = () => {
 		};
 
 		getMessages();
-	}, [showToast, selectedConversation.userId]);
+	}, [showToast, selectedConversation.userId, selectedConversation.mock]);
 
 	return (
 		<Flex
@@ -148,13 +163,13 @@ const MessageContainer = () => {
 
 				{!loadingMessages &&(
 					messages.map((message) => (
-						// <Flex
-						// 	key={message._id}
-						// 	direction={"column"}
-						// 	ref={messages.length - 1 === messages.indexOf(message) ? messageEndRef : null}
-						// >
-							<Message key={message._id} message={message} ownMessage={currentUser._id === message.sender}/>
-						// </Flex>
+						<Flex
+							key={message._id}
+							direction={"column"}
+							ref={messages.length - 1 === messages.indexOf(message) ? messageEndRef : null}
+						>
+							<Message key={message._id} message={message} ownMessage={currentUser._id === message.sender} handleDeleteMessage={handleDeleteMessage} />
+						 </Flex>
 					)))}
 			</Flex>
 

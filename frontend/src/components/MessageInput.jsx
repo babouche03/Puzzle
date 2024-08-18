@@ -84,8 +84,9 @@ const MessageInput = ({setMessages}) => {
 	};
 
 	return (
-		
-			<form onSubmit={handleSendMessage}>
+		 <Flex gap={2} alignItems={"center"}>
+
+			<form onSubmit={handleSendMessage} style={{flex:95}}>
 				<InputGroup>
 					<Input
 						w={"full"}
@@ -98,6 +99,36 @@ const MessageInput = ({setMessages}) => {
 					</InputRightElement>
 				</InputGroup>
 			</form>
+			<Flex flex={5} cursor={"pointer"}>
+				<BsFillImageFill size={20} onClick={() => imageRef.current.click()} />
+				<Input type={"file"} hidden ref={imageRef} onChange={handleImageChange} />
+			</Flex>
+			<Modal
+				isOpen={imgUrl}
+				onClose={() => {
+					onClose();
+					setImgUrl("");
+				}}
+			>
+				<ModalOverlay />
+				<ModalContent>
+					<ModalHeader></ModalHeader>
+					<ModalCloseButton />
+					<ModalBody>
+						<Flex mt={5} w={"full"}>
+							<Image src={imgUrl} />
+						</Flex>
+						<Flex justifyContent={"flex-end"} my={2}>
+							{!isSending ? (
+								<IoSendSharp size={24} cursor={"pointer"} onClick={handleSendMessage} />
+							) : (
+								<Spinner size={"md"} />
+							)}
+						</Flex>
+					</ModalBody>
+				</ModalContent>
+			</Modal>
+		</Flex>
 	);
 };
 	
