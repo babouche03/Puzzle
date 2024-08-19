@@ -15,12 +15,13 @@ import CreatePost from './components/CreatePost';
 function App() {
   const user = useRecoilValue(userAtom);
   const location = useLocation();
+  const { pathname } = useLocation();
 
   // Check if the current path matches "/:username/post/:pid"
   const hideHeader = /^\/[^/]+\/post\/[^/]+$/.test(location.pathname);
   return (
   <Box position={"relative"} w='full'>
-    <Container maxW="620px">
+    <Container maxW={pathname === "/" ? { base: "620px", md: "900px" } : "720px"}>
 
       {!hideHeader && <Header />}
       <Routes>
@@ -39,7 +40,6 @@ function App() {
         <Route path='/chat' element={user ? <ChatPage /> : <Navigate to={"/auth"} />} />
       </Routes>
 
-      
       
     </Container>
   </Box>

@@ -11,7 +11,7 @@ const useFollowUnfollow = (user) => {
 
 	const handleFollowUnfollow = async () => {
 		if (!currentUser) {
-			showToast("Error", "Please login to follow", "error");
+			showToast("Error", "请先登录", "error");
 			return;
 		}
 		if (updating) return;
@@ -31,10 +31,10 @@ const useFollowUnfollow = (user) => {
 			}
 
 			if (following) {
-				showToast("Success", `Unfollowed ${user.name}`, "success");
+				showToast("Success", `已取消关注 ${user.name}`, "success");
 				user.followers.pop(); // simulate removing from followers
 			} else {
-				showToast("Success", `Followed ${user.name}`, "success");
+				showToast("Success", `已关注 ${user.name}`, "success");
 				user.followers.push(currentUser?._id); // simulate adding to followers
 			}
 			setFollowing(!following);

@@ -2,6 +2,7 @@ import Conversation from "../models/conversationModel.js";
 import Message from "../models/messageModel.js";
 import { getRecipientSocketId, io } from "../socket/socket.js";
 import { v2 as cloudinary } from "cloudinary";
+
 async function sendMessage(req, res){
     try{
         const { recipientId, message } = req.body;
@@ -101,24 +102,36 @@ async function getConversations(req, res) {
 }
 
 async function deleteMessage(req, res) {
+    const { messageId } = req.params;
+
     try {
-		const { id } = req.params;
-		const message = await Message.findById(id);
-		if (!message) {
-			return res.status(404).json({ error: "消息不存在" });
-		}
+        const message = await Message.findByIdAndDelete(messageId);
 
-		// 检查是否是消息发送者
-		if (message.sender.toString() !== req.user._id.toString()) {
-			return res.status(403).json({ error: "您无权删除此消息" });
-		}
+        if (!message) {
+            return res.status(404).json({ error: "消息不存在" });
+        }
 
-		await message.remove();
-		res.status(200).json({ message: "消息已删除" });
-	} catch (error) {
-		res.status(500).json({ error: error.message });
-	}
+        // 查找所属的会话
+        const conversation = await Conversation.findById(message.conversationId);
+
+        if (!conversation) {
+            return res.status(404).json({ error: "会话不存在" });
+        }
+
+        // 获取会话中的最后一条消息
+        const lastMessage = await Message.findOne({ conversationId: conversation._id })
+            .sort({ createdAt: -1 });
+
+        // 更新会话的 lastMessage 字段
+        conversation.lastMessage = lastMessage ? lastMessage._id : null;
+        await conversation.save();
+
+        res.status(200).json({ success: true });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
 }
+
 
 
 

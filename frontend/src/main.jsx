@@ -29,7 +29,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 	<RecoilRoot>
 	<BrowserRouter>
 	<ChakraProvider theme={theme}>
-	{/* <ColorModeScript initialColorMode={theme.config.initialColorMode} /> */}
+	<ColorModeScript initialColorMode={theme.config.initialColorMode} />
 	<SocketContextProvider>
 		<App />
 	</SocketContextProvider>

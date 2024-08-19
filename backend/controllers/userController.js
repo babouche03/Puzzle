@@ -211,5 +211,46 @@ const getUserProfile = async (req, res) => {
     }
   };
 
+  const getSuggestedUsers = async (req, res) => {
+	try {
+	  // 从请求中获取当前用户的 ID
+	  const userId = req.user._id;
+  
+	  // 查找当前用户的已关注列表
+	  const usersFollowedByYou = await User.findById(userId).select("following");
+  
+	  // 使用 MongoDB 聚合管道获取排除当前用户的随机用户列表
+	  const users = await User.aggregate([
+		{
+		  // 排除当前用户自身
+		  $match: {
+			_id: { $ne: userId },
+		  },
+		},
+		{
+		  // 随机抽取 10 个用户
+		  $sample: { size: 10 },
+		},
+	  ]);
+  
+	  // 过滤出尚未关注的用户
+	  const filteredUsers = users.filter(
+		(user) => !usersFollowedByYou.following.includes(user._id)
+	  );
+  
+	  // 只保留前 4 个用户作为建议
+	  const suggestedUsers = filteredUsers.slice(0, 4);
+  
+	  // 为确保安全性，将所有建议用户的密码字段设为 null
+	  suggestedUsers.forEach((user) => (user.password = null));
+  
+	  // 返回状态码 200 和建议用户列表的 JSON 数据
+	  res.status(200).json(suggestedUsers);
+	} catch (error) {
+	  // 捕获错误并返回状态码 500 和错误信息
+	  res.status(500).json({ error: error.message });
+	}
+  };
 
-export {signupUser, loginUser,logoutUser,followUnFollowUser,updateUser,getUserProfile};
+
+export {signupUser, loginUser,logoutUser,followUnFollowUser,updateUser,getUserProfile,getSuggestedUsers};

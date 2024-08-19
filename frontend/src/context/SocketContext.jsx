@@ -15,19 +15,22 @@ export const SocketContextProvider = ({ children }) => {
 	const user = useRecoilValue(userAtom);
 
 	useEffect(() => {
+		if (!user?._id) return; // 如果用户未登录，跳过Socket连接
+	  
 		const socket = io("http://localhost:5001", {
-			query: {
-				userId: user?._id,
-			},
+		  query: {
+			userId: user._id,
+		  },
 		});
-
+	  
 		setSocket(socket);
-
+	  
 		socket.on("getOnlineUsers", (users) => {
-			setOnlineUsers(users);
+		  setOnlineUsers(users);
 		});
+	  
 		return () => socket && socket.close();
-	}, [user?._id]);
+	  }, [user?._id]); // 依赖user._id，当它变化时重新连接Socket
 
 	return <SocketContext.Provider value={{ socket, onlineUsers }}>{children}</SocketContext.Provider>;
 };

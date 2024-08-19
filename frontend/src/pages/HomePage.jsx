@@ -1,16 +1,18 @@
-import {Button,Flex,Spinner} from '@chakra-ui/react';
+import {Flex,Spinner,Box} from '@chakra-ui/react';
 import {Link} from 'react-router-dom'
 import { useState, useEffect } from 'react';
 import { useRecoilState } from'recoil';
 import useShowToast from '../hooks/useShowToast';
 import postsAtom from "../atoms/postsAtom";
 import Post from "../components/Post";
+import SuggestedUsers from "../components/SuggestedUsers";
 
 const HomePage = ()=> {
 
     const [posts, setPosts] = useRecoilState(postsAtom);
 	const [loading, setLoading] = useState(true);
 	const showToast = useShowToast();
+
 	useEffect(() => {
 		const getFeedPosts = async () => {
 			setLoading(true);
@@ -34,19 +36,31 @@ const HomePage = ()=> {
 	}, [showToast,setPosts]);
 
     return(
-        <>
-           {!loading && posts.length === 0 && <h1>您未关注任何用户，关注后再来看看哦</h1>}
+      <Flex gap="10" flexDirection={{ base: 'column', md: 'row' }}>
+			{/* Posts section */}
+			<Box flex={72}>
+				{!loading && posts.length === 0 && <h1>您未关注任何用户，关注后再来看看哦</h1>}
 
-            {loading && (
-                <Flex justify='center'>
-                    <Spinner size='xl' />
-                </Flex>
-            )}
+				{loading && (
+					<Flex justify="center">
+						<Spinner size="xl" />
+					</Flex>
+				)}
 
-                {posts.map((post) => (
+				{posts.map((post) => (
 					<Post key={post._id} post={post} postedBy={post.postedBy} />
 				))}
-        </>
+			</Box>
+
+			{/* Suggested users section */}
+			<Box
+				flex={28}
+				order={{ base: 1, md: 2 }}  // On mobile, it will appear after the posts section
+				display={{ base: 'block', md: 'block' }}
+			>
+				<SuggestedUsers />
+			</Box>
+		</Flex>
        
     );
 };

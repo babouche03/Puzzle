@@ -66,16 +66,16 @@ const Conversation = ({ conversation, isOnline }) => {
 					{user.username} <Image src='/verified.png' w={4} h={4} ml={1} />
 				</Text>
 				<Text fontSize={"xs"} display={"flex"} alignItems={"center"} gap={1}>
-					{currentUser._id === lastMessage.sender ? (
-						<Box color={lastMessage.seen ? "green.400" : ""}>
-							<BsCheck2All size={16} />
-						</Box>
-					) : (
-						""
-					)}
-					{lastMessage.text.length > 18
-						? lastMessage.text.substring(0, 18) + "..."
-						: lastMessage.text || <BsFillImageFill size={16} />}
+				{currentUser._id === lastMessage?.sender ? (
+					<Box color={lastMessage?.seen ? "green.400" : ""}>
+					<BsCheck2All size={16} />
+					</Box>
+				) : (
+					""
+				)}
+				{lastMessage?.text?.length > 18
+					? lastMessage.text.substring(0, 18) + "..."
+					: lastMessage?.text || <BsFillImageFill size={16} />}
 				</Text>
 			</Stack>
 		</Flex>

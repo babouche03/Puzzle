@@ -62,7 +62,7 @@ const MessageContainer = () => {
 		});
 
 		return () => socket.off("newMessage");
-	}, [socket]); 
+	}, [socket, selectedConversation, setConversations]); 
 
 	//实时更新消息已读状态的功能
 	useEffect(() => {
@@ -159,7 +159,6 @@ const MessageContainer = () => {
 					))}
 
 	
-
 
 				{!loadingMessages &&(
 					messages.map((message) => (

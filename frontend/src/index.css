@@ -32,6 +32,13 @@
 	font-size: 50px;
   }
   
+  .ma-shan-zheng-regular1 {
+	font-family: "Ma Shan Zheng", cursive;
+	font-weight: 800;
+	font-style: normal;
+	font-size: 25px;
+	margin-bottom: 10px;
+  }
   ::-webkit-scrollbar {
 	width: 7px;
 }
