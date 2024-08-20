@@ -67,7 +67,7 @@ export default function LoginCard() {
     >
       <Stack spacing={8} mx={'auto'} maxW={'lg'} py={12} px={6}>
         <Stack align={'center'}>
-          <Heading textAlign={'center'} class='ma-shan-zheng-regular'>
+            <Heading textAlign={'center'} class='ma-shan-zheng-regular'>
             登录
           </Heading>
           <Text fontSize={'lg'} color={'gray.600'}>

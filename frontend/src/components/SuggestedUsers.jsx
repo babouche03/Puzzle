@@ -45,8 +45,8 @@ const SuggestedUsers = () => {
   return (
     <>
       {/* 标题文字 */}
-      <Text mb={4} fontWeight={"bold"} class='ma-shan-zheng-regular1'>
-        推荐用户
+      <Text mb={4} fontWeight={"bold"} className='ma-shan-zheng-regular1'>
+        认识一下
       </Text>
       {/* 布局容器，垂直排列 */}
       <Flex direction={"column"} gap={4}>

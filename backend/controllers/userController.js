@@ -252,5 +252,37 @@ const getUserProfile = async (req, res) => {
 	}
   };
 
+  // 获取用户的关注者
+const getUserFollowers = async (req, res) => {
+	try {
+		// 通过ID查找用户
+		const user = await User.findById(req.params.id).select("followers");
+		if (!user) return res.status(404).json({ error: "用户未找到" });
 
-export {signupUser, loginUser,logoutUser,followUnFollowUser,updateUser,getUserProfile,getSuggestedUsers};
+		// 查询关注者的详细信息
+		const followers = await User.find({ _id: { $in: user.followers } }).select("username name profilePic");
+		res.status(200).json(followers);
+	} catch (error) {
+		res.status(500).json({ error: error.message });
+		console.log("Error in getUserFollowers: ", error.message);
+	}
+};
+
+// 获取用户正在关注的人
+const getUserFollowing = async (req, res) => {
+	try {
+		// 通过ID查找用户
+		const user = await User.findById(req.params.id).select("following");
+		if (!user) return res.status(404).json({ error: "用户未找到" });
+
+		// 查询正在关注的用户的详细信息
+		const following = await User.find({ _id: { $in: user.following } }).select("username name profilePic");
+		res.status(200).json(following);
+	} catch (error) {
+		res.status(500).json({ error: error.message });
+		console.log("Error in getUserFollowing: ", error.message);
+	}
+};
+
+
+export {signupUser, loginUser,logoutUser,followUnFollowUser,updateUser,getUserProfile,getSuggestedUsers,getUserFollowers,getUserFollowing};

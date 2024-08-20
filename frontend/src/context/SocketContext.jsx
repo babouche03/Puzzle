@@ -15,12 +15,10 @@ export const SocketContextProvider = ({ children }) => {
 	const user = useRecoilValue(userAtom);
 
 	useEffect(() => {
-		if (!user?._id) return; // 如果用户未登录，跳过Socket连接
-	  
-		const socket = io("http://localhost:5001", {
-		  query: {
-			userId: user._id,
-		  },
+		const socket = io("localhost:5001", {
+			query: {
+				userId: user?._id,
+			},
 		});
 	  
 		setSocket(socket);

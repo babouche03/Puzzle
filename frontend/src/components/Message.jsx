@@ -5,6 +5,7 @@ import userAtom from "../atoms/userAtom";
 import { BsCheck2All } from "react-icons/bs";
 import { useState, useRef, useEffect } from "react";
 import { useColorModeValue } from "@chakra-ui/react";
+import { useNavigate } from 'react-router-dom';
 
 const Message = ({ ownMessage, message, handleDeleteMessage }) => {
   const selectedConversation = useRecoilValue(selectedConversationAtom);
@@ -15,6 +16,7 @@ const Message = ({ ownMessage, message, handleDeleteMessage }) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const messageRef = useRef(null);
   const popoverRef = useRef(null);
+  const navigate = useNavigate();
 
   const handleContextMenu = (e) => {
     e.preventDefault();
@@ -106,7 +108,10 @@ const Message = ({ ownMessage, message, handleDeleteMessage }) => {
         </Flex>
       ) : (
         <Flex gap={2} ref={messageRef} onContextMenu={handleContextMenu}>
-          <Avatar src={selectedConversation.userProfilePic} w="7" h={7} />
+          <Avatar src={selectedConversation.userProfilePic} w="7" h={7} cursor="pointer"  onClick={(e) => {
+                                    e.preventDefault();
+                                    navigate(`/${selectedConversation.username}`);
+                                }} />
           <Popover isOpen={popoverOpen} onClose={closePopover} placement="bottom-start">
             <PopoverTrigger>
               <Box>
