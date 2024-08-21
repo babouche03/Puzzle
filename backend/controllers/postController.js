@@ -144,7 +144,8 @@ const replyToPost = async (req, res) => {
 		post.replies.push(reply);
 		await post.save();
 
-		res.status(200).json(reply);
+		  // 返回新添加的回复对象
+		  res.status(200).json(post.replies[post.replies.length - 1]);
 	} catch (err) {
 		res.status(500).json({ error: err.message });
 	}
@@ -215,4 +216,57 @@ const getUserPosts = async (req, res) => {
 		res.status(500).json({ error: error.message });
 	}
 };
-export { createPost, getPost, deletePost,likeUnlikePost,replyToPost,getFeedPosts,getUserPosts,deleteComment} 
+// 添加/取消拥抱
+const hugUnhugPost = async (req, res) => {
+	try {
+		const { id: postId } = req.params;
+		const userId = req.user._id;
+
+		const post = await Post.findById(postId);
+
+		if (!post) {
+			return res.status(404).json({ error: "Post not found" });
+		}
+
+		const userHuggedPost = post.hugs.includes(userId);
+
+		if (userHuggedPost) {
+			// 取消拥抱
+			await Post.updateOne({ _id: postId }, { $pull: { hugs: userId } });
+			res.status(200).json({ message: "Post unhugged successfully" });
+		} else {
+			// 添加拥抱
+			post.hugs.push(userId);
+			await post.save();
+			res.status(200).json({ message: "Post hugged successfully" });
+		}
+	} catch (err) {
+		res.status(500).json({ error: err.message });
+	}
+};
+
+// 获取点赞用户列表
+const getLikeUsers = async (req, res) => {
+	try {
+	  const post = await Post.findById(req.params.postId).populate('likes', 'username avatar');
+	  if (!post) return res.status(404).json({ error: '帖子未找到' });
+  
+	  res.json(post.likes);
+	} catch (error) {
+	  res.status(500).json({ error: error.message });
+	}
+  };
+  
+  // 获取碰拳用户列表
+  const getHugUsers = async (req, res) => {
+	try {
+	  const post = await Post.findById(req.params.postId).populate('hugs', 'username avatar');
+	  if (!post) return res.status(404).json({ error: '帖子未找到' });
+  
+	  res.json(post.hugs);
+	} catch (error) {
+	  res.status(500).json({ error: error.message });
+	}
+  };
+  
+export { createPost, getPost, deletePost,likeUnlikePost,replyToPost,getFeedPosts,getUserPosts,deleteComment,hugUnhugPost,getLikeUsers,getHugUsers} 

@@ -20,6 +20,12 @@ const postSchema = mongoose.Schema(
 			ref: "User",
 			default: [],
 		},
+		hugs: {
+			// array of user ids
+			type: [mongoose.Schema.Types.ObjectId],
+			ref: "User",
+			default: [],
+		},
 		replies: [
 			{
 				userId: {
