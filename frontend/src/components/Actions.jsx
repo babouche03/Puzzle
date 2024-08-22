@@ -22,8 +22,9 @@ import { PiHandFistLight } from "react-icons/pi";; // 引入react-icon
 import userAtom from "../atoms/userAtom";
 import useShowToast from "../hooks/useShowToast";
 import postsAtom from "../atoms/postsAtom";
+import { useNavigate } from "react-router-dom";
 
-const Actions = ({ post }) => {
+const Actions = ({ post}) => {
 	const user = useRecoilValue(userAtom);
 	const [liked, setLiked] = useState(post.likes.includes(user?._id));
 	const [hugged, setHugged] = useState(post.hugs.includes(user?._id)); // 拥抱状态
@@ -34,6 +35,7 @@ const Actions = ({ post }) => {
 	const [reply, setReply] = useState("");
 	const [modalUsers, setModalUsers] = useState([]);
 	const [modalTitle, setModalTitle] = useState("");
+	const navigate = useNavigate();
 
 	// 用于评论的弹窗
 	const { isOpen: isReplyModalOpen, onOpen: onReplyModalOpen, onClose: onReplyModalClose } = useDisclosure();
@@ -55,7 +57,6 @@ const Actions = ({ post }) => {
 	};
 
 	const showToast = useShowToast();
-	const { isOpen, onOpen, onClose } = useDisclosure();
 
 	const handleLikeAndUnlike = async () => {
 		if (!user) return showToast("Error", "您必须登录才能点赞", "error");
@@ -156,6 +157,8 @@ const Actions = ({ post }) => {
 			setIsReplying(false);
 		}
 	};
+	// 调试输出，检查 user 对象是否完整
+	// console.log(user);
 
 	return (
 		<Flex flexDirection="column">
@@ -211,11 +214,11 @@ const Actions = ({ post }) => {
 					{post.replies.length} 回复
 				</Text>
 				<Box w={0.5} h={0.5} borderRadius={"full"} bg={"gray.light"}></Box>
-				<Text onClick={() => fetchUsers("likes")} color={"gray.light"} fontSize="sm">
+				<Text onClick={() => fetchUsers("likes")} color={"gray.light"} fontSize="sm" cursor="pointer" _hover={{ textDecoration: "underline"}}>
 					{post.likes.length} 点赞
 				</Text>
 				<Box w={0.5} h={0.5} borderRadius={"full"} bg={"gray.light"}></Box>
-				<Text onClick={() => fetchUsers("hugs")} color={"gray.light"} fontSize="sm">
+				<Text onClick={() => fetchUsers("hugs")} color={"gray.light"} fontSize="sm" cursor="pointer" _hover={{ textDecoration: "underline"}}>
 					{post.hugs.length} 碰拳
 				</Text>
 			</Flex>
@@ -228,8 +231,14 @@ const Actions = ({ post }) => {
 					<ModalBody>
 						{modalUsers.map((user) => (
 							<Flex key={user._id} alignItems="center" gap={3} mb={2}>
-								<Avatar src={user.avatar} name={user.username} size="sm" />
+								<Avatar src={user.profilePic} name={user.username} size="sm" cursor={"pointer"} onClick={(e) => {
+                            e.preventDefault();
+                            navigate(`/${user.username}`);
+                        }}/>
 								<Text>{user.username}</Text>
+								<Text color={"gray.light"} fontSize="sm">
+									{user.name}
+								</Text>
 							</Flex>
 						))}
 					</ModalBody>

@@ -2,9 +2,11 @@ import { Flex, Text, Avatar, Divider, Icon } from '@chakra-ui/react';
 import { DeleteIcon } from '@chakra-ui/icons'; // 导入删除图标
 import { useRecoilValue } from 'recoil';
 import userAtom from '../atoms/userAtom';
+import { useNavigate } from 'react-router-dom';
 
 const Comment = ({ reply, lastReply, onDelete }) => {
   const currentUser = useRecoilValue(userAtom); // 获取当前用户信息
+  const navigate = useNavigate();
 
   const handleDelete = () => {
     if (window.confirm('确定要删除这条评论吗？')) {
@@ -15,7 +17,10 @@ const Comment = ({ reply, lastReply, onDelete }) => {
   return (
     <>
       <Flex gap={4} py={2} my={2} w={"full"}>
-        <Avatar src={reply.userProfilePic} size={"sm"} />
+        <Avatar src={reply.userProfilePic} size={"sm"} cursor={"pointer"} onClick={(e) => {
+                            e.preventDefault();
+                            navigate(`/${reply.username}`);
+                        }} />
         
         <Flex gap={1} w={"full"} flexDirection={"column"}>
           <Flex w={"full"} justifyContent={"space-between"} alignItems={"center"}>

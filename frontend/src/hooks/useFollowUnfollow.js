@@ -31,10 +31,10 @@ const useFollowUnfollow = (user) => {
 			}
 
 			if (following) {
-				showToast("Success", `已取消关注 ${user.name}`, "success");
+				showToast("Success", `已取消关注 ${user.username}`, "success");
 				user.followers.pop(); // simulate removing from followers
 			} else {
-				showToast("Success", `已关注 ${user.name}`, "success");
+				showToast("Success", `已关注 ${user.username}`, "success");
 				user.followers.push(currentUser?._id); // simulate adding to followers
 			}
 			setFollowing(!following);

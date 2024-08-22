@@ -58,6 +58,10 @@ const UserHeader = ({user}) => {
     });
   }
   
+  const handleChatClick = () => {
+    navigate(`/chat?username=${user.username}`);
+  };
+
   return (
    <VStack gap={4} alignItems={"start"}>
     <Flex justifyContent={'space-between'} w={"full"}> 
@@ -126,7 +130,7 @@ const UserHeader = ({user}) => {
         </Flex>
         <Flex>
             <Box className='icon-container'>
-            <BsChatText size={25} cursor={"pointer"}/>
+            <BsChatText size={25} cursor={"pointer"}  onClick={handleChatClick}/>
             </Box>
             <Box className='icon-container'>
               <Menu>
@@ -158,7 +162,7 @@ const UserHeader = ({user}) => {
       ) : (
         modalData.map((user) => (
           <Flex key={user._id} alignItems="center" mb={3}>
-            <Avatar name={user.name} src={user.profilePic} mr={3} onClick={(e) => {
+            <Avatar name={user.name} src={user.profilePic} mr={3} cursor={"pointer"} onClick={(e) => {
                             e.preventDefault();
                             window.location.href = `/${user.username}`;
                             onClose();
@@ -178,9 +182,6 @@ const UserHeader = ({user}) => {
     <Flex flex={1} borderBottom={"1.5px solid white"} justifyContent={"center"} pb='3' cursor={"pointer"}>
 					<Text fontWeight={"bold"}> Puzzle</Text>
 		</Flex>
-    {/* <Flex flex={1} borderBottom={"1.5px solid white"} justifyContent={"center"} color={"gray.light"} pb='3' cursor={"pointer"}>
-          <Text fontWeight={"bold"}> Replies</Text>
-    </Flex> */}
     </Flex>
    
    </VStack>

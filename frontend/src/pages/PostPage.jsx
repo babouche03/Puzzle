@@ -19,7 +19,6 @@ const PostPage = () => {
     const { pid } = useParams();
     const currentUser = useRecoilValue(userAtom);
     const navigate = useNavigate();
-    
 
     const currentPost = posts[0];
     
@@ -123,7 +122,10 @@ const PostPage = () => {
 
             <Flex>
                 <Flex w={"full"} alignItems={"center"} gap={3}>
-                    <Avatar src={user.profilePic} size={"md"} name='Mark Zuckerberg' />
+                    <Avatar src={user.profilePic} size={"md"} name='Mark Zuckerberg' cursor={"pointer"} onClick={(e) => {
+                            e.preventDefault();
+                            navigate(`/${user.username}`);
+                        }} />
                     <Flex>
                         <Text fontSize={"sm"} fontWeight={"bold"}>
                             {user.username}

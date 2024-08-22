@@ -283,6 +283,22 @@ const getUserFollowing = async (req, res) => {
 		console.log("Error in getUserFollowing: ", error.message);
 	}
 };
+//冻结账户
+const freezeAccount = async (req, res) => {
+	try {
+		const user = await User.findById(req.user._id);
+		if (!user) {
+			return res.status(400).json({ error: "User not found" });
+		}
+
+		user.isFrozen = true;
+		await user.save();
+
+		res.status(200).json({ success: true });
+	} catch (error) {
+		res.status(500).json({ error: error.message });
+	}
+};
 
 
-export {signupUser, loginUser,logoutUser,followUnFollowUser,updateUser,getUserProfile,getSuggestedUsers,getUserFollowers,getUserFollowing};
+export {signupUser, loginUser,logoutUser,followUnFollowUser,updateUser,getUserProfile,getSuggestedUsers,getUserFollowers,getUserFollowing,freezeAccount};

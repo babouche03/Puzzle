@@ -248,7 +248,7 @@ const hugUnhugPost = async (req, res) => {
 // 获取点赞用户列表
 const getLikeUsers = async (req, res) => {
 	try {
-	  const post = await Post.findById(req.params.postId).populate('likes', 'username avatar');
+	  const post = await Post.findById(req.params.postId).populate('likes', 'username profilePic');
 	  if (!post) return res.status(404).json({ error: '帖子未找到' });
   
 	  res.json(post.likes);
@@ -260,7 +260,7 @@ const getLikeUsers = async (req, res) => {
   // 获取碰拳用户列表
   const getHugUsers = async (req, res) => {
 	try {
-	  const post = await Post.findById(req.params.postId).populate('hugs', 'username avatar');
+	  const post = await Post.findById(req.params.postId).populate('hugs', 'username profilePic');
 	  if (!post) return res.status(404).json({ error: '帖子未找到' });
   
 	  res.json(post.hugs);
