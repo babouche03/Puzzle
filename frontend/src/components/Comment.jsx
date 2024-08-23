@@ -4,19 +4,24 @@ import { useRecoilValue } from 'recoil';
 import userAtom from '../atoms/userAtom';
 import { useNavigate } from 'react-router-dom';
 
-const Comment = ({ reply, lastReply, onDelete }) => {
+const Comment = ({ reply, lastReply, onDelete, onReply}) => {
   const currentUser = useRecoilValue(userAtom); // 获取当前用户信息
   const navigate = useNavigate();
 
-  const handleDelete = () => {
+  const handleDelete = (e) => {
+    e.stopPropagation(); // 阻止事件冒泡，防止触发回复弹窗
     if (window.confirm('确定要删除这条评论吗？')) {
-      onDelete(reply._id); // 传递评论ID给父组件
+      onDelete(reply._id);
     }
+  };
+
+  const handleReply = () => {
+    onReply(`@${reply.username} `);  // 传递 `@用户名` 给父组件
   };
 
   return (
     <>
-      <Flex gap={4} py={2} my={2} w={"full"}>
+      <Flex gap={4} py={2} my={2} w={"full"} onClick={handleReply} cursor="pointer">
         <Avatar src={reply.userProfilePic} size={"sm"} cursor={"pointer"} onClick={(e) => {
                             e.preventDefault();
                             navigate(`/${reply.username}`);

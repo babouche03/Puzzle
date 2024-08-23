@@ -26,7 +26,16 @@ const MessageContainer = () => {
 			method: 'DELETE',
 		  });
 		  // 更新前端 UI，删除消息
-		  setMessages((prevMessages) => prevMessages.filter((msg) => msg._id !== messageId));
+		  setMessages((prevMessages) => {
+            const updatedMessages = prevMessages.filter((msg) => msg._id !== messageId);
+            // 打印删除后的最新消息
+            if (updatedMessages.length > 0) {
+                console.log("After deletion, latest message:", updatedMessages[updatedMessages.length - 1]);
+            } else {
+                console.log("No messages left after deletion.");
+            }
+            return updatedMessages;
+        });
 		} catch (error) {
 		  console.error("Failed to delete message:", error);
 		}

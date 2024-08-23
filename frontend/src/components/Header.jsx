@@ -47,11 +47,14 @@ const Header = () => {
   return (
     <Flex justifyContent={"space-between"} mt={6} mb="12">
       {user && (
-        <Flex alignItems={"center"} gap={5}>
+        <Flex alignItems={"center"} gap={4}>
           <Link as={RouterLink} to="/">
             <AiFillHome size={24} />
           </Link>
           <BsSearch size={22} onClick={onOpen} />
+          <Link as={RouterLink} to={`/settings`}>
+						<MdOutlineSettings size={24} />
+					</Link>
         </Flex>
       )}
 
@@ -64,7 +67,7 @@ const Header = () => {
       <Image
         cursor={"pointer"}
         alt="logo"
-        w={6}
+        w={7}
         src={colorMode === "dark" ? "/light-logo.svg" : "/dark-logo.svg"}
         onClick={toggleColorMode}
       />
@@ -77,9 +80,6 @@ const Header = () => {
           <Link as={RouterLink} to={`/chat`}>
             <BsFillChatQuoteFill size={24} />
           </Link>
-          <Link as={RouterLink} to={`/settings`}>
-						<MdOutlineSettings size={24} />
-					</Link>
           <Button size={"xs"} onClick={logout}>
             <FiLogOut size={20} />
           </Button>

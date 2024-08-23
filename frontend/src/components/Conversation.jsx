@@ -7,7 +7,6 @@ import {
 	Stack,
 	Text,
 	WrapItem,
-	useColorMode,
 	useColorModeValue,
 } from "@chakra-ui/react";
 import { useRecoilState, useRecoilValue } from "recoil";
@@ -22,7 +21,6 @@ const Conversation = ({ conversation, isOnline }) => {
 	const [selectedConversation, setSelectedConversation] = useRecoilState(selectedConversationAtom);
 	const bgColor = useColorModeValue("gray.200", "gray.700");
 
-	console.log("selectedConverstion", selectedConversation);
 	return (
 		<Flex
 			gap={4}
