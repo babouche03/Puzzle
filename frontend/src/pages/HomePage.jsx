@@ -7,11 +7,26 @@ import postsAtom from "../atoms/postsAtom";
 import Post from "../components/Post";
 import SuggestedUsers from "../components/SuggestedUsers";
 
-const HomePage = ()=> {
 
+const HomePage = ()=> {
+	
     const [posts, setPosts] = useRecoilState(postsAtom);
 	const [loading, setLoading] = useState(true);
 	const showToast = useShowToast();
+	
+	useEffect(() => {
+		// 保存滚动位置
+		const handleScroll = () => {
+		//   console.log('Saving scroll position:', window.scrollY);
+		  sessionStorage.setItem('scrollPosition', window.scrollY);
+		};
+	
+		window.addEventListener('scroll', handleScroll);
+	    return () => {
+			window.removeEventListener('scroll', handleScroll);
+		};
+	  }, []);
+	
 
 	useEffect(() => {
 		const getFeedPosts = async () => {
@@ -33,6 +48,22 @@ const HomePage = ()=> {
 		};
 		getFeedPosts();
 	}, [showToast,setPosts]);
+	
+	useEffect(() => {
+		// 确保页面完全渲染后再恢复滚动位置
+		const restoreScrollPosition = () => {
+		  const savedScrollPosition = sessionStorage.getItem('scrollPosition');
+		  console.log('Restoring scroll position:', savedScrollPosition);
+	
+		  if (!loading && savedScrollPosition) {
+			requestAnimationFrame(() => {
+			  window.scrollTo(0, parseInt(savedScrollPosition, 10));
+			});
+		  }
+		};
+	
+		restoreScrollPosition();
+	  }, [loading, posts]); // 依赖于 loading 和 posts，确保数据加载和渲染完成后恢复滚动位置
 
     return(
       <Flex gap="10" flexDirection={{ base: 'column', md: 'row' }}>
