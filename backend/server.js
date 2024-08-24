@@ -14,6 +14,7 @@ dotenv.config();
 //通过 dotenv 加载 .env 文件中的环境变量到 process.env
 
 connectDB();//连接mongodb数据库
+job.start();
 
 
 // 增加请求负载限制
