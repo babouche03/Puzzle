@@ -1,3 +1,4 @@
+import path from "path";
 import express from 'express';
 import dotenv from "dotenv";
 import connectDB from './db/connectDB.js';
@@ -21,6 +22,7 @@ app.use(bodyParser.urlencoded({ limit: '20mb', extended: true }));
 
 
 const PORT=process.env.PORT || 5000;
+const __dirname = path.resolve();
 
 cloudinary.config({
 	cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -38,7 +40,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/messages", messageRoutes);
 
-// http://localhost:5000 => backend,frontend
+// http://localhost:5001 => backend,frontend
 
 if (process.env.NODE_ENV === "production") {
 	app.use(express.static(path.join(__dirname, "/frontend/dist")));
