@@ -9,6 +9,7 @@ import {v2 as cloudinary} from "cloudinary";
 import bodyParser from "body-parser";
 import messageRoutes from './routes/messageRoutes.js';
 import { app, server } from "./socket/socket.js";
+import job from "./cron/cron.js";
 
 dotenv.config();
 //通过 dotenv 加载 .env 文件中的环境变量到 process.env
