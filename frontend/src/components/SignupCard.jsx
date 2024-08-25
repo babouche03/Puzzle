@@ -1,4 +1,3 @@
-
 import {
   Flex,
   Box,
@@ -14,7 +13,6 @@ import {
   Text,
   useColorModeValue,
   Link,
-  useToast,
 } from '@chakra-ui/react'
 import { useState } from 'react'
 import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons'
@@ -27,16 +25,22 @@ export default function SignupCard() {
   const [showPassword, setShowPassword] = useState(false)
   const setAuthScreen = useSetRecoilState(authScreenAtom)
   const [inputs, setInputs] = useState({
-		name: "",
-		username: "",
-		email: "",
-		password: "",
-	});
+    name: "",
+    username: "",
+    email: "",
+    password: "",
+    confirmPassword: "", // 添加确认密码输入字段
+  });
 
   const showToast = useShowToast();
   const setUser = useSetRecoilState(userAtom);
 
   const handleSignup = async () => {
+    if (inputs.password !== inputs.confirmPassword) {
+      showToast("Error", "两次密码输入不一致", "error");
+      return;
+    }
+
     try {
       // 向 /api/users/signup 发送 POST 请求
       const res = await fetch("/api/users/signup", {
@@ -86,12 +90,11 @@ export default function SignupCard() {
           bg={useColorModeValue('white', 'gray.700')}
           boxShadow={'lg'}
           p={8}
-
           >
           <Stack spacing={4}>
             <HStack>
               <Box>
-                <FormControl >
+                <FormControl>
                   <FormLabel>真实姓名（选填）</FormLabel>
                   <Input type="text" 
                     onChange={(e) => setInputs({ ...inputs, name: e.target.value })}
@@ -109,19 +112,35 @@ export default function SignupCard() {
                 </FormControl>
               </Box>
             </HStack>
-            <FormControl >
+            <FormControl>
               <FormLabel>邮箱地址（选填）</FormLabel>
               <Input type="email"
                 onChange={(e) => setInputs({...inputs, email: e.target.value })}
                 value={inputs.email}
               />
             </FormControl>
-            <FormControl  isRequired>
+            <FormControl isRequired>
               <FormLabel>账户密码</FormLabel>
               <InputGroup>
                 <Input type={showPassword ? 'text' : 'password'}
                   onChange={(e) => setInputs({...inputs, password: e.target.value })}
                   value={inputs.password}
+                />
+                <InputRightElement h={'full'}>
+                  <Button
+                    variant={'ghost'}
+                    onClick={() => setShowPassword((showPassword) => !showPassword)}>
+                    {showPassword ? <ViewIcon /> : <ViewOffIcon />}
+                  </Button>
+                </InputRightElement>
+              </InputGroup>
+            </FormControl>
+            <FormControl isRequired>
+              <FormLabel>确认密码</FormLabel>
+              <InputGroup>
+                <Input type={showPassword ? 'text' : 'password'}
+                  onChange={(e) => setInputs({...inputs, confirmPassword: e.target.value })}
+                  value={inputs.confirmPassword}
                 />
                 <InputRightElement h={'full'}>
                   <Button

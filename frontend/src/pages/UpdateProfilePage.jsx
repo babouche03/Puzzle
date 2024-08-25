@@ -139,7 +139,7 @@ export default function UpdateProfilePage() {
         <FormControl >
           <FormLabel>账户密码</FormLabel>
           <Input
-            placeholder="password"
+            placeholder="password(不少于6位)"
             value={inputs.password}
             onChange={(e) => setInputs({...inputs, password: e.target.value })}
             _placeholder={{ color: 'gray.500' }}
