@@ -48,16 +48,25 @@ const Message = ({ ownMessage, message, handleDeleteMessage }) => {
             <PopoverTrigger>
               <Box>
                 {message.text && (
-                  <Flex bg={blueColor} maxW={"350px"} p={1} borderRadius={"md"}>
-                    <Text color={"white"}>{message.text}</Text>
-                    <Box
-                      alignSelf={"flex-end"}
-                      ml={1}
-                      color={message.seen ? "green.200" : "white"}
-                      fontWeight={"bold"}
-                    >
-                      <BsCheck2All size={14} />
-                    </Box>
+                  <Flex direction="column" alignItems="flex-end">
+                    <Flex bg={blueColor} maxW={"350px"} p={1} borderRadius={"md"}>
+                      <Text color={"white"}>{message.text}</Text>
+                      <Box
+                        alignSelf={"flex-end"}
+                        ml={1}
+                        color={message.seen ? "green.200" : "white"}
+                        fontWeight={"bold"}
+                      >
+                        <BsCheck2All size={14} />
+                      </Box>
+                    </Flex>
+                    <Text fontSize="xs" color="gray.500" mt={1}>
+                      {new Date(message.createdAt).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        year: 'numeric', month: 'short', day: 'numeric'
+                      })}
+                    </Text>
                   </Flex>
                 )}
                 {message.img && !imgLoaded && (
@@ -73,16 +82,15 @@ const Message = ({ ownMessage, message, handleDeleteMessage }) => {
                   </Flex>
                 )}
                 {message.img && imgLoaded && (
-                  <Flex mt={5} w={"200px"}>
+                  <Flex direction="column" alignItems="flex-end" mt={5}>
                     <Image src={message.img} alt="Message image" borderRadius={4} />
-                    <Box
-                      alignSelf={"flex-end"}
-                      ml={1}
-                      color={message.seen ? "green.300" : ""}
-                      fontWeight={"bold"}
-                    >
-                      <BsCheck2All size={16} />
-                    </Box>
+                    <Text fontSize="xs" color="gray.500" mt={1}>
+                      {new Date(message.createdAt).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        year: 'numeric', month: 'short', day: 'numeric'
+                      })}
+                    </Text>
                   </Flex>
                 )}
               </Box>
@@ -98,7 +106,6 @@ const Message = ({ ownMessage, message, handleDeleteMessage }) => {
                 color="white"
                 p={1}
                 textAlign="center"
-				
               >
                 撤回
               </PopoverBody>
@@ -108,17 +115,32 @@ const Message = ({ ownMessage, message, handleDeleteMessage }) => {
         </Flex>
       ) : (
         <Flex gap={2} ref={messageRef} onContextMenu={handleContextMenu}>
-          <Avatar src={selectedConversation.userProfilePic} w="7" h={7} cursor="pointer"  onClick={(e) => {
-                                    e.preventDefault();
-                                    navigate(`/${selectedConversation.username}`);
-                                }} />
+          <Avatar
+            src={selectedConversation.userProfilePic}
+            w="7"
+            h={7}
+            cursor="pointer"
+            onClick={(e) => {
+              e.preventDefault();
+              navigate(`/${selectedConversation.username}`);
+            }}
+          />
           <Popover isOpen={popoverOpen} onClose={closePopover} placement="bottom-start">
             <PopoverTrigger>
               <Box>
                 {message.text && (
-                  <Text maxW={"350px"} bg={bgColor} p={1} borderRadius={"md"} color={"black"}>
-                    {message.text}
-                  </Text>
+                  <Flex direction="column" alignItems="flex-start">
+                    <Text maxW={"350px"} bg={bgColor} p={1} borderRadius={"md"} color={"black"}>
+                      {message.text}
+                    </Text>
+                    <Text fontSize="xs" color="gray.500" mt={1}>
+                      {new Date(message.createdAt).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        year: 'numeric', month: 'short', day: 'numeric'
+                      })}
+                    </Text>
+                  </Flex>
                 )}
                 {message.img && !imgLoaded && (
                   <Flex mt={5} w={"200px"}>
@@ -133,20 +155,25 @@ const Message = ({ ownMessage, message, handleDeleteMessage }) => {
                   </Flex>
                 )}
                 {message.img && imgLoaded && (
-                  <Flex mt={5} w={"200px"}>
+                  <Flex direction="column" alignItems="flex-start" mt={5}>
                     <Image src={message.img} alt="Message image" borderRadius={4} />
+                    <Text fontSize="xs" color="gray.500" mt={1}>
+                      {new Date(message.createdAt).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        year: 'numeric', month: 'short', day: 'numeric'
+                      })}
+                    </Text>
                   </Flex>
                 )}
               </Box>
             </PopoverTrigger>
-        
           </Popover>
         </Flex>
       )}
     </>
   );
 };
-
 export default Message;
 
 

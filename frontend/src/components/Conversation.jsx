@@ -20,6 +20,9 @@ const Conversation = ({ conversation, isOnline }) => {
 	const lastMessage = conversation.lastMessage;
 	const [selectedConversation, setSelectedConversation] = useRecoilState(selectedConversationAtom);
 	const bgColor = useColorModeValue("gray.200", "gray.700");
+	// 检查最新消息是否是其他用户发来的且未读
+	const isUnread = lastMessage && lastMessage.sender.toString() !== currentUser._id.toString() && !lastMessage.seen;
+
 
 	return (
 		<Flex
@@ -74,6 +77,15 @@ const Conversation = ({ conversation, isOnline }) => {
 				{lastMessage?.text?.length > 18
 					? lastMessage.text.substring(0, 18) + "..."
 					: lastMessage?.text || <BsFillImageFill size={16} />}
+					{isUnread && (
+						<Box
+							bg="red.500"
+							borderRadius="full"
+							width="9px"
+							height="9px"
+							ml={3} // 添加一点左边距，使红点与文本分开
+						/>
+					)}
 				</Text>
 			</Stack>
 		</Flex>
