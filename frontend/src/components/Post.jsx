@@ -174,18 +174,36 @@ const Post = ({ post, postedBy }) => {
 
                     <Text fontSize={"sm"}>{post.text}</Text>
 
-                    {/* 显示图片 */}
+                  {/* 显示图片或视频 */}
                     {post.img && Array.isArray(post.img) && post.img.length > 0 && (
                         post.img.length === 1 ? (
-                            <Box borderRadius={6} overflow={"hidden"} border={"1px solid"} borderColor={"gray.light"}>
-                                <Image src={post.img[0]} w={"full"} />
-                            </Box>
+                            /\.(mp4|webm|ogg|avi|mov|flv)$/i.test(post.img[0]) ? ( // 检查是否是视频文件
+                                <Box borderRadius={6} overflow={"hidden"} border={"1px solid"} borderColor={"gray.light"}>
+                                    <video autoPlay loop muted width="100%"> {/* 添加 autoPlay、loop 和 muted 属性 */}
+                                        <source src={post.img[0]} type="video/mp4" />
+                                        您的浏览器不支持视频标签。
+                                    </video>
+                                </Box>
+                            ) : (
+                                <Box borderRadius={6} overflow={"hidden"} border={"1px solid"} borderColor={"gray.light"}>
+                                    <Image src={post.img[0]} w={"full"} />
+                                </Box>
+                            )
                         ) : (
                             <Flex flexWrap="wrap" gap={2}>
                                 {post.img.map((url, index) => (
-                                    <Box key={index} w="48%" borderRadius={6} overflow={"hidden"} border={"1px solid"} borderColor={"gray.light"}>
-                                        <Image src={url} w={"full"} h={"150px"} objectFit={"cover"} />
-                                    </Box>
+                                    /\.(mp4|webm|ogg|avi|mov|flv)$/i.test(url) ? ( // 检查是否是视频文件
+                                        <Box key={index} w="48%" borderRadius={6} overflow={"hidden"} border={"1px solid"} borderColor={"gray.light"}>
+                                            <video autoPlay loop muted width="100%"> {/* 添加 autoPlay、loop 和 muted 属性 */}
+                                                <source src={url} type="video/mp4" />
+                                                您的浏览器不支持视频标签。
+                                            </video>
+                                        </Box>
+                                    ) : (
+                                        <Box key={index} w="48%" borderRadius={6} overflow={"hidden"} border={"1px solid"} borderColor={"gray.light"}>
+                                            <Image src={url} w={"full"} h={"150px"} objectFit={"cover"} />
+                                        </Box>
+                                    )
                                 ))}
                             </Flex>
                         )

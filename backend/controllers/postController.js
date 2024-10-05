@@ -25,23 +25,41 @@ const createPost = async (req, res) => {
             return res.status(400).json({ error: `文本长度必须小于 ${maxLength} 字符` });
         }
 
-        // 检查图片数量
-        if (img && img.length > 4) {
-            return res.status(400).json({ error: "最多可以上传 4 张图片" });
+        // 确保 img 存在并且是数组
+        if (!Array.isArray(img)) {
+            return res.status(400).json({ error: "无效的媒体数据" });
         }
 
-        // 上传图片
-        const imgUrls = [];
-        if (img) {
-            for (const image of img) {
-                const uploadedResponse = await cloudinary.uploader.upload(image, {
-                    // 不使用上传预设
+        // 分离图片和视频
+        const imageFiles = img.filter(media => media.type === 'image');
+        const videoFiles = img.filter(media => media.type === 'video');
+
+        // 检测上传数量限制
+        if (imageFiles.length > 4) {
+            return res.status(400).json({ error: "最多只能上传四张图片" });
+        }
+        if (videoFiles.length > 1) {
+            return res.status(400).json({ error: "只能上传一段视频" });
+        }
+
+        // 上传图片和视频
+        const mediaUrls = [];
+        for (const media of img) {
+            const fileType = media.type.split("/")[0];
+            let uploadedResponse;
+
+            if (fileType === 'image') {
+                uploadedResponse = await cloudinary.uploader.upload(media.url);
+            } else if (fileType === 'video') {
+                uploadedResponse = await cloudinary.uploader.upload_large(media.url, {
+                    resource_type: 'video'
                 });
-                imgUrls.push(uploadedResponse.secure_url);
             }
+
+            mediaUrls.push(uploadedResponse.secure_url);
         }
 
-        const newPost = new Post({ postedBy, text, img: imgUrls });
+        const newPost = new Post({ postedBy, text, img: mediaUrls });
         await newPost.save();
 
         res.status(201).json(newPost);

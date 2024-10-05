@@ -19,16 +19,15 @@ const PostPage = () => {
     const currentUser = useRecoilValue(userAtom);
     const navigate = useNavigate();
     const [isReplying, setIsReplying] = useState(false);
- 
+
     const currentPost = posts[0];
 
     // 图片模态框
     const { isOpen: isImageModalOpen, onOpen: onImageModalOpen, onClose: onImageModalClose } = useDisclosure();
-    const [selectedImage, setSelectedImage] = useState(null); // 保存被选中的图片
+    const [selectedMedia, setSelectedMedia] = useState(null); // 保存被选中的图片或视频
     // 回复模态框
-    const { isOpen: isReplyModalOpen, onOpen: onReplyModalOpen, onClose: onReplyModalClose } = useDisclosure(); // 管理回复模态框的状态
+    const { isOpen: isReplyModalOpen, onOpen: onReplyModalOpen, onClose: onReplyModalClose } = useDisclosure();
     const [reply, setReply] = useState(''); // 保存回复内容
-
 
     useEffect(() => {
         const getPost = async () => {
@@ -48,7 +47,6 @@ const PostPage = () => {
         getPost();
     }, [showToast, pid, setPosts]);
     
-
     const handleDeletePost = async () => {
         try {
             if (!window.confirm("您确定要删除这条帖子吗?")) return;
@@ -69,13 +67,13 @@ const PostPage = () => {
     };
 
     const handleBack = () => {
-    // 使用浏览器的返回逻辑
-    window.history.back(); 
+        // 使用浏览器的返回逻辑
+        window.history.back(); 
     };
 
-    const handleImageClick = (url) => {
-        setSelectedImage(url);
-        onImageModalOpen();
+    const handleMediaClick = (url) => {
+        setSelectedMedia(url); // 设置被点击的媒体的 URL
+        onImageModalOpen(); // 打开模态框
     };
 
     // 删除评论
@@ -111,47 +109,47 @@ const PostPage = () => {
     // 发送回复
     const handleSendReply = async (postId) => {
         if (!user) {
-          showToast("Error", "您必须登录才能回复", "error");
-          return;
-        }
-    
-        if (isReplying) return;
-    
-        setIsReplying(true);
-    
-        try {
-          const response = await fetch(`/api/posts/reply/${postId}`, {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ text: reply }),
-          });
-    
-          const data = await response.json();
-    
-          if (data.error) {
-            showToast("Error", data.error, "error");
+            showToast("Error", "您必须登录才能回复", "error");
             return;
-          }
-    
-          const updatedPosts = posts.map((p) => {
-            if (p._id === postId) {
-              return { ...p, replies: [...p.replies, data] };
-            }
-            return p;
-          });
-    
-          setPosts(updatedPosts);
-          showToast("Success", "回复已发送", "success");
-          onReplyModalClose();
-          setReply("");
-        } catch (error) {
-          showToast("Error", error.message, "error");
-        } finally {
-          setIsReplying(false);
         }
-      };
+
+        if (isReplying) return;
+
+        setIsReplying(true);
+
+        try {
+            const response = await fetch(`/api/posts/reply/${postId}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ text: reply }),
+            });
+
+            const data = await response.json();
+
+            if (data.error) {
+                showToast("Error", data.error, "error");
+                return;
+            }
+
+            const updatedPosts = posts.map((p) => {
+                if (p._id === postId) {
+                    return { ...p, replies: [...p.replies, data] };
+                }
+                return p;
+            });
+
+            setPosts(updatedPosts);
+            showToast("Success", "回复已发送", "success");
+            onReplyModalClose();
+            setReply("");
+        } catch (error) {
+            showToast("Error", error.message, "error");
+        } finally {
+            setIsReplying(false);
+        }
+    };
 
     if (!user && loading) {
         return (
@@ -203,29 +201,70 @@ const PostPage = () => {
             <Text my={3}>{currentPost.text}</Text>
 
             {currentPost.img && Array.isArray(currentPost.img) && currentPost.img.length > 0 && (
-                currentPost.img.length === 1 ? (
-                    <Box borderRadius={6} overflow={"hidden"} border={"1px solid"} borderColor={"gray.light"}>
-                        <Image src={currentPost.img[0]} w={"full"} onClick={() => handleImageClick(currentPost.img[0])} cursor="pointer" />
+    currentPost.img.length === 1 ? (
+        // 检测文件类型并选择标签
+        /\.(mp4|webm|ogg|avi|mov|flv)$/.test(currentPost.img[0]) ? (
+            <Box borderRadius={6} overflow={"hidden"} border={"1px solid"} borderColor={"gray.light"}>
+                <video
+                    src={currentPost.img[0]}
+                    controls
+                    loop // 添加循环播放
+                    muted={false}
+                    width="100%"
+                    onClick={() => handleMediaClick(currentPost.img[0])}
+                    style={{ cursor: "pointer" }} // 增加手型光标提示可以点击
+                />
+            </Box>
+        ) : (
+            <Box borderRadius={6} overflow={"hidden"} border={"1px solid"} borderColor={"gray.light"}>
+                <Image 
+                    src={currentPost.img[0]} 
+                    w={"full"} 
+                    onClick={() => handleMediaClick(currentPost.img[0])} 
+                    cursor="pointer" 
+                />
+            </Box>
+        )
+    ) : (
+        <Flex flexWrap="wrap" gap={2}>
+            {currentPost.img.map((url, index) => (
+                /\.(mp4|webm|ogg|avi|mov|flv)$/.test(url) ? (
+                    <Box
+                        key={index}
+                        w="48%"
+                        borderRadius={6}
+                        overflow={"hidden"}
+                        border={"1px solid"}
+                        borderColor={"gray.light"}
+                        cursor="pointer"
+                        onClick={() => handleMediaClick(url)}
+                    >
+                        <video
+                            src={url}
+                            width={"100%"}
+                            height={"150px"}
+                            objectFit={"cover"}
+                            loop // 添加循环播放
+                        />
                     </Box>
                 ) : (
-                    <Flex flexWrap="wrap" gap={2}>
-                        {currentPost.img.map((url, index) => (
-                            <Box
-                                key={index}
-                                w="48%"
-                                borderRadius={6}
-                                overflow={"hidden"}
-                                border={"1px solid"}
-                                borderColor={"gray.light"}
-                                cursor="pointer"
-                                onClick={() => handleImageClick(url)}
-                            >
-                                <Image src={url} w={"full"} h={"150px"} objectFit={"cover"} />
-                            </Box>
-                        ))}
-                    </Flex>
+                    <Box
+                        key={index}
+                        w="48%"
+                        borderRadius={6}
+                        overflow={"hidden"}
+                        border={"1px solid"}
+                        borderColor={"gray.light"}
+                        cursor="pointer"
+                        onClick={() => handleMediaClick(url)}
+                    >
+                        <Image src={url} w={"full"} h={"150px"} objectFit={"cover"} />
+                    </Box>
                 )
-            )}
+            ))}
+        </Flex>
+    )
+)}
 
             <Flex gap={3} my={3}>
                 <Actions post={currentPost} />
@@ -252,13 +291,24 @@ const PostPage = () => {
                 />
             ))}
 
-            {/* 图片模态框 */}
+            {/* 媒体模态框 */}
             <Modal isOpen={isImageModalOpen} onClose={onImageModalClose} size="lg">
                 <ModalOverlay />
-                <ModalContent maxW="70%" maxH="80%">
+                <ModalContent maxW="80%" maxH="80%">
+                    <ModalCloseButton />
                     <ModalBody p={0}>
-                        {selectedImage && (
-                            <Image src={selectedImage} w="full" h="full" objectFit="contain" onClick={onImageModalClose} />
+                        {selectedMedia && (
+                            selectedMedia.endsWith('.mp4') ? (
+                                <video
+                                    src={selectedMedia}
+                                    controls
+                                    width="100%"
+                                    height="100%"
+                                    style={{ objectFit: "contain" }}
+                                />
+                            ) : (
+                                <Image src={selectedMedia} width="100%" height="100%" objectFit="contain" />
+                            )
                         )}
                     </ModalBody>
                 </ModalContent>
@@ -268,20 +318,20 @@ const PostPage = () => {
             <Modal isOpen={isReplyModalOpen} onClose={onReplyModalClose}>
                 <ModalOverlay />
                 <ModalContent>
-                    <ModalHeader>回复评论</ModalHeader>
+                    <ModalHeader>回复</ModalHeader>
                     <ModalCloseButton />
                     <ModalBody>
                         <FormControl>
                             <Input
+                                placeholder="输入您的回复..."
                                 value={reply}
                                 onChange={(e) => setReply(e.target.value)}
-                                placeholder="撰写回复..."
                             />
                         </FormControl>
                     </ModalBody>
                     <ModalFooter>
-                         <Button colorScheme="blue" mr={3} onClick={() => handleSendReply(currentPost._id)}>
-                            发送
+                        <Button colorScheme="blue" onClick={() => handleSendReply(currentPost._id)}>
+                            发送回复
                         </Button>
                     </ModalFooter>
                 </ModalContent>

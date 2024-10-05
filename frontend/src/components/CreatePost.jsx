@@ -17,7 +17,7 @@ import {
     useColorModeValue,
     useDisclosure,
 } from "@chakra-ui/react";
-import { BsFillImageFill } from "react-icons/bs";
+import { BsFillImageFill, BsFillCameraVideoFill } from "react-icons/bs"; // 引入视频图标
 import { useState, useRef } from "react";
 import { AddIcon } from "@chakra-ui/icons";
 import useShowToast from "../hooks/useShowToast";
@@ -27,12 +27,14 @@ import postsAtom from "../atoms/postsAtom";
 import { useParams } from "react-router-dom";
 
 const MAX_CHAR = 500;
+const MAX_IMAGES = 4;
 
 const CreatePost = () => {
     const { isOpen, onOpen, onClose } = useDisclosure();
     const [postText, setPostText] = useState("");
-    const [imgUrls, setImgUrls] = useState([]); // 用于存储多个图片 URL
+    const [mediaUrls, setMediaUrls] = useState([]); // 用于存储图片或视频 URL
     const imageRef = useRef(null);
+    const videoRef = useRef(null); // 用于视频上传
     const [remainingChar, setRemainingChar] = useState(MAX_CHAR);
     const user = useRecoilValue(userAtom);
     const showToast = useShowToast();
@@ -53,21 +55,32 @@ const CreatePost = () => {
         }
     };
 
-    const handleImageChange = (e) => {
+    const handleMediaChange = (e, type) => {
         const files = e.target.files;
-        const newImgUrls = [];
-
+    
+        if (type === "image" && mediaUrls.some((media) => media.type === "video")) {
+            showToast("Error", "你已上传视频，不能再上传图片", "error");
+            return;
+        }
+    
+        if (type === "video" && mediaUrls.length > 0) {
+            showToast("Error", "只能上传一段视频或最多四张图片", "error");
+            return;
+        }
+    
+        const newMediaUrls = [];
+    
         for (let i = 0; i < files.length; i++) {
             const file = files[i];
             const reader = new FileReader();
-
+    
             reader.onloadend = () => {
-                newImgUrls.push(reader.result);
-                if (newImgUrls.length === files.length) {
-                    setImgUrls((prev) => [...prev, ...newImgUrls]); // 添加到现有的图片 URL 数组中
+                newMediaUrls.push({ type, url: reader.result });
+                if (newMediaUrls.length === files.length) {
+                    setMediaUrls((prev) => Array.isArray(prev) ? [...prev, ...newMediaUrls] : newMediaUrls); // 确保 mediaUrls 是数组
                 }
             };
-
+    
             reader.readAsDataURL(file);
         }
     };
@@ -80,7 +93,7 @@ const CreatePost = () => {
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ postedBy: user._id, text: postText, img: imgUrls }), // 发送所有图片 URL
+                body: JSON.stringify({ postedBy: user._id, text: postText, img: mediaUrls }), // 发送所有媒体 URL
             });
 
             const data = await res.json();
@@ -92,10 +105,10 @@ const CreatePost = () => {
             if (username === user.username) {
                 setPosts([data, ...posts]);
             }
-            // 清空输入框和图片
+            // 清空输入框和媒体
             onClose();
             setPostText("");
-            setImgUrls([]);
+            setMediaUrls([]);
         } catch (error) {
             showToast("Error", error, "error");
         } finally {
@@ -132,23 +145,35 @@ const CreatePost = () => {
                                 {remainingChar}/{MAX_CHAR}
                             </Text>
 
-                            <Input type='file' hidden ref={imageRef} onChange={handleImageChange} multiple /> {/* 添加 multiple 属性以支持多图上传 */}
+                            <Input type='file' hidden ref={imageRef} onChange={(e) => handleMediaChange(e, "image")} multiple accept="image/*" /> {/* 支持多图上传 */}
+                            <Input type='file' hidden ref={videoRef} onChange={(e) => handleMediaChange(e, "video")} accept="video/*" /> {/* 仅支持单段视频上传 */}
 
-                            <BsFillImageFill
-                                style={{ marginLeft: "5px", cursor: "pointer" }}
-                                size={22}
-                                onClick={() => imageRef.current.click()}
-                            />
+                            <Flex>
+                                <BsFillImageFill
+                                    style={{ marginLeft: "5px", cursor: "pointer" }}
+                                    size={22}
+                                    onClick={() => imageRef.current.click()}
+                                />
+                                <BsFillCameraVideoFill
+                                    style={{ marginLeft: "10px", cursor: "pointer" }}
+                                    size={22}
+                                    onClick={() => videoRef.current.click()}
+                                />
+                            </Flex>
                         </FormControl>
 
-                        {imgUrls.length > 0 && (
-                            <Flex mt={5} w={"full"} wrap="wrap"> {/* 使用 wrap="wrap" 使图片在行中自动换行 */}
-                                {imgUrls.map((url, index) => (
+                        {Array.isArray(mediaUrls) && mediaUrls.length > 0 && ( // 检查 mediaUrls 是否是数组
+                            <Flex mt={5} w={"full"} wrap="wrap"> {/* 使用 wrap="wrap" 使媒体在行中自动换行 */}
+                                {mediaUrls.map((media, index) => (
                                     <Flex key={index} position={"relative"} m={2}>
-                                        <Image src={url} alt={`Selected img ${index + 1}`} boxSize="100px" objectFit="cover" /> {/* 调整 boxSize 以控制图片大小 */}
+                                        {media.type === "image" ? (
+                                            <Image src={media.url} alt={`Selected img ${index + 1}`} boxSize="100px" objectFit="cover" /> 
+                                        ) : (
+                                            <video src={media.url} width="100px" controls />
+                                        )}
                                         <CloseButton
                                             onClick={() => {
-                                                setImgUrls(imgUrls.filter((_, i) => i !== index)); // 删除选定的图片
+                                                setMediaUrls((prev) => Array.isArray(prev) ? prev.filter((_, i) => i !== index) : prev); // 防御性 filter 检查
                                             }}
                                             bg={"gray.600"}
                                             position={"absolute"}
